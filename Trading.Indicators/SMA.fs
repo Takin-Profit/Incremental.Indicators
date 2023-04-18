@@ -2,7 +2,6 @@ module TakinProfit.Indicators.SMA
 
 open System
 open FSharp.Data.Adaptive
-open TakinProfit.Indicators.Quotes
 
 type SMAResult = { Date: DateTime; Sma: double }
 let mutable private _results: aset<SMAResult> = cset []
@@ -17,7 +16,7 @@ let recalculate =
     Quotes.all |> ASet.map id
     AVal.force results.Content
 
- 
+
 let toTimeSpan periodSize =
     match periodSize with
     | "1" -> TimeSpan.Zero
