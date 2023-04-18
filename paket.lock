@@ -1,0 +1,14 @@
+STORAGE: NONE
+RESTRICTION: || (== net5.0) (== netstandard2.0) (== netstandard2.1)
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    FSharp.Core (7.0.200)
+    FSharp.Stats (0.4.11)
+      FSharp.Core (>= 6.0.1)
+      FSharpAux (>= 1.1)
+      FSharpAux.IO (>= 1.1)
+    FSharpAux (1.1)
+      FSharp.Core (>= 6.0.1)
+    FSharpAux.IO (1.1)
+      FSharp.Core (>= 6.0.1)
+      FSharpAux (>= 1.1)
