@@ -4,8 +4,19 @@
          "name": "fantomas-format",
          "group": "pre-commit",
          "command": "dotnet",
-         "args": [ "fantomas", "${staged}", "--out", "${staged}" ],
+         "args": [ "fantomas", "${staged}" ],
          "include": ["**/*.fs", "**/*.fsi", "**/*.fsx"]
+      },
+      {
+         "name": "commit-message-linter",
+         "command": "dotnet",
+         "args": [
+            "husky",
+            "exec",
+            ".husky/csx/commit-lint.csx",
+            "--args",
+            "${args}"
+         ]
       }
    ]
 }

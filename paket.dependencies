@@ -10,3 +10,4 @@ nuget FSharp.Core
 nuget Expecto.BenchmarkDotNet
 nuget Expecto.FsCheck
 nuget Expecto.Hopac
+nuget Logary.Adapters.Facade prerelease

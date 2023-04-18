@@ -1,9 +1,9 @@
 module TakinProfit.Incremental.Indicators.Types
 
 type CandlePart =
-    |Open
-    |High
-    |Low
+    | Open
+    | High
+    | Low
     | Close
     | Volume
     | HL2
