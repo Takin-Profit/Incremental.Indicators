@@ -1,4 +1,4 @@
-﻿module Incremental.Indicators.Tests
+﻿module Incremental.Indicators.Tests.Main
 
 open Expecto
 open Hopac
