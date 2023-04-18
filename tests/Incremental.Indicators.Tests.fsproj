@@ -7,12 +7,12 @@
         <RootNamespace>Incremental.Indicators.Tests</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="Numerix.fs"/>
-        <Compile Include="Main.fs"/>
+        <Compile Include="Numerix.fs" />
+        <Compile Include="Main.fs" />
     </ItemGroup>
     <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
-        <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High"/>
-        <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory=".."/>
+        <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
+        <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory=".." />
     </Target>
-    <Import Project="..\.paket\Paket.Restore.targets"/>
+    <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

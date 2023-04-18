@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Incremental.Indicators", "Incremental.Indicators\Incremental.Indicators.fsproj", "{DB41946D-FDB6-4185-BD12-D43A8637564F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Incremental.Indicators", "src\Incremental.Indicators.fsproj", "{DB41946D-FDB6-4185-BD12-D43A8637564F}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Incremental.Indicators.Tests", "Incremental.Indicators.Tests\Incremental.Indicators.Tests.fsproj", "{512B28B6-4F5A-4563-8D8F-C502F37D6E27}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Incremental.Indicators.Tests", "tests\Incremental.Indicators.Tests.fsproj", "{512B28B6-4F5A-4563-8D8F-C502F37D6E27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
