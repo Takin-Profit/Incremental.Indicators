@@ -1,0 +1,11 @@
+{
+   "tasks": [
+      {
+         "name": "fantomas-format",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [ "fantomas", "${staged}", "--out", "${staged}" ],
+         "include": ["**/*.fs", "**/*.fsi", "**/*.fsx"]
+      }
+   ]
+}

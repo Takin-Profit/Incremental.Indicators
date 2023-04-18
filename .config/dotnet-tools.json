@@ -7,6 +7,24 @@
       "commands": [
         "paket"
       ]
+    },
+    "fsdocs-tool": {
+      "version": "18.1.0",
+      "commands": [
+        "fsdocs"
+      ]
+    },
+    "fantomas": {
+      "version": "6.0.0",
+      "commands": [
+        "fantomas"
+      ]
+    },
+    "husky": {
+      "version": "0.5.4",
+      "commands": [
+        "husky"
+      ]
     }
   }
 }
