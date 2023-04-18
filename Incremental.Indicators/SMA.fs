@@ -1,4 +1,4 @@
-module TakinProfit.Indicators.SMA
+module TakinProfit.Incremental.Indicators.SMA
 
 open System
 open FSharp.Data.Adaptive

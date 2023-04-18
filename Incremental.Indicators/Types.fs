@@ -1,4 +1,4 @@
-module TakinProfit.Trading.Indicators.Types
+module TakinProfit.Incremental.Indicators.Types
 
 type CandlePart =
     | Open

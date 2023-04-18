@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Trading.Indicators", "Trading.Indicators\Trading.Indicators.fsproj", "{DB41946D-FDB6-4185-BD12-D43A8637564F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Incremental.Indicators", "Incremental.Indicators\Incremental.Indicators.fsproj", "{DB41946D-FDB6-4185-BD12-D43A8637564F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

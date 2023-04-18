@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RootNamespace>TakinProfit.Incremental.Indicators</RootNamespace>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="Library.fs"/>
+        <Compile Include="Types.fs"/>
+        <Compile Include="Numerix.fs"/>
+        <Compile Include="Quotes.fs"/>
+        <Compile Include="SMA.fs"/>
+    </ItemGroup>
+    <Import Project="..\.paket\Paket.Restore.targets"/>
+</Project>

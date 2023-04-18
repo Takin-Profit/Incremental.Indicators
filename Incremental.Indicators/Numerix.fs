@@ -1,4 +1,4 @@
-module TakinProfit.Trading.Indicators.Numerix
+module TakinProfit.Incremental.Indicators.Numerix
 
 let mean (values: double[]) = Array.sum values / float values.Length
 
