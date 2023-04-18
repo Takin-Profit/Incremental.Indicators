@@ -6,6 +6,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Library.fs" />
+    <Compile Include="Numerix.fs" />
+    <Compile Include="Quotes.fs" />
+    <Compile Include="SMA.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

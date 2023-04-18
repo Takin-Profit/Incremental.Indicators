@@ -1,4 +1,4 @@
-﻿namespace Trading.Indicators
+﻿namespace TakinProfit.Trading.Indicators
 
 module Say =
     let hello name =
