@@ -1,4 +1,4 @@
-module Tests
+module Incremental.Indicators.Tests.Numerix
 
 open Expecto
 

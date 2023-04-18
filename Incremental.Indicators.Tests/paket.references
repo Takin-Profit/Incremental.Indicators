@@ -1,8 +1,9 @@
-Expecto
-YoloDev.Expecto.TestSdk
-Microsoft.NET.Test.Sdk
-FSharp.Core
-Expecto.BenchmarkDotNet
-Expecto.FsCheck
-Expecto.Hopac
-Logary.Adapters.Facade
+group Test
+    Expecto
+    YoloDev.Expecto.TestSdk
+    Microsoft.NET.Test.Sdk
+    FSharp.Core
+    Expecto.BenchmarkDotNet
+    Expecto.FsCheck
+    Expecto.Hopac
+    Logary.Adapters.Facade

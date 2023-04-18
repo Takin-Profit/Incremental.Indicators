@@ -1,4 +1,4 @@
-module TakinProfit.Incremental.Indicators.Quotes
+module Incremental.Indicators.Quotes
 
 open System
 open FSharp.Data.Adaptive
