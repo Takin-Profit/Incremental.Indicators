@@ -1,2 +1,1 @@
-nuget FSharp.Stats
-nuget FSharp.Data.Adaptive
+FSharp.Data.Adaptive
