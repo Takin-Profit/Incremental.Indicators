@@ -1,6 +1,6 @@
-module Incremental.Indicators.Tests.Numerix
+module Incremental.Indicators.Tests.Calc
 
-open Incremental.Indicators.Numerix
+open Incremental.Indicators.Calc
 open Expecto
 open System
 

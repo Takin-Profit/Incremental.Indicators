@@ -1,4 +1,4 @@
-module Incremental.Indicators.Numerix
+module Incremental.Indicators.Calc
 
 open System
 
