@@ -3,6 +3,7 @@ module Incremental.Indicators.Tests.Numerix
 open Incremental.Indicators.Numerix
 open Expecto
 open System
+open FsCheck
 
 let config =
     { FsCheckConfig.defaultConfig with
@@ -23,4 +24,14 @@ let tests =
               else
                   let expectedMean = Array.sum values / double values.Length
                   let actualMean = mean values
-                  expectedMean = actualMean ]
+                  expectedMean = actualMean
+
+          testProperty "Standard deviation is always positive"
+          <| fun values ->
+              let result = stdDev values
+
+              match result with
+              | Error _ -> true
+              | Ok x -> x >= 0.0
+
+          ]
