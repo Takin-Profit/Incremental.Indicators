@@ -49,3 +49,16 @@ let roundDown (date: DateTime) (interval: TimeSpan) =
         date
     else
         date.AddTicks(-(date.Ticks % interval.Ticks))
+
+// DETERMINE DECIMAL PLACES
+// does not currently take into account trailing zeros
+let getDecimalPlaces (n: decimal) : int =
+    let mutable n = abs n % 1m
+    let mutable decimalPlaces = 0
+
+    while n > 0m do
+        decimalPlaces <- decimalPlaces + 1
+        n <- n * 10m
+        n <- abs (n % 1m)
+
+    decimalPlaces
