@@ -75,3 +75,42 @@ let stdDevTests = // tolerance ]
               Expect.isOk actual "should be Ok"
               let actual = stdDev values |> getRes
               Expect.floatClose Accuracy.high actual expected "should be within accuracy" ]
+
+[<Tests>]
+let slopeTests =
+    testList
+        "Slope function"
+        [
+          // Test with valid inputs
+          testCase "Valid inputs should return proper result"
+          <| fun _ ->
+              let x = [| 1.0; 2.0; 3.0; 4.0; 5.0 |]
+              let y = [| 2.0; 3.0; 4.0; 5.0; 6.0 |]
+              let expected = Ok(1.0)
+              let actual = slope x y
+              Expect.isOk actual "should be Ok"
+              Expect.equal (getRes actual) (getRes expected) "should be equal"
+
+          // Test with empty arrays
+          testCase "Empty arrays"
+          <| fun _ ->
+              let x = [||]
+              let y = [||]
+              let actual = slope x y
+              Expect.isError actual "should return an error"
+
+          // Test with null inputs
+          testCase "Null inputs"
+          <| fun _ ->
+              let x = null
+              let y = null
+              let actual = slope x y
+              Expect.isError actual "should return an error"
+
+          // Test with different length arrays
+          testCase "Different length arrays"
+          <| fun _ ->
+              let x = [| 1.0; 2.0; 3.0 |]
+              let y = [| 2.0; 3.0; 4.0; 5.0 |]
+              let actual = slope x y
+              Expect.isError actual "should return an error" ]
