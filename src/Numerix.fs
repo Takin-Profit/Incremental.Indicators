@@ -2,9 +2,6 @@ module Incremental.Indicators.Numerix
 
 open System
 
-let (|IsNull|_|) value =
-    if obj.ReferenceEquals(value, null) then None else Some()
-
 // check for nulls, empty arrays, and existing of NaN or Infinity
 let dataIsValid (list: double[]) =
     match list with
@@ -62,3 +59,36 @@ let getDecimalPlaces (n: decimal) : int =
         n <- abs (n % 1m)
 
     decimalPlaces
+
+module OptionalMath =
+    let abs (value: double option) : double option =
+        match value with
+        | None -> None
+        | Some v -> if v < 0.0 then Some(-v) else Some v
+
+    let roundOptionDecimal (value: decimal option) (digits: int) : decimal option =
+        match value with
+        | None -> None
+        | Some v -> Some(Math.Round(v, digits))
+
+    let roundOptionDouble (value: double option) (digits: int) : double option =
+        match value with
+        | None -> None
+        | Some v -> Some(Math.Round(v, digits))
+
+    let roundDouble (value: double) (digits: int) : double = Math.Round(value, digits)
+
+    let roundDecimal (value: decimal) (digits: int) : decimal = System.Math.Round(value, digits)
+
+    let noneToNaN (value: double option) : double =
+        match value with
+        | None -> Double.NaN
+        | Some v -> v
+
+    let optionNaNToNone (value: double option) : double option =
+        match value with
+        | None -> None
+        | Some v -> if Double.IsNaN(v) then None else Some v
+
+    let naNToNone (value: double) : double option =
+        if Double.IsNaN(value) then None else Some value
