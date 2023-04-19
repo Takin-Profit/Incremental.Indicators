@@ -42,3 +42,10 @@ let slope (x: double[]) (y: double[]) =
         let numerator = Array.map2 (fun x y -> (x - meanX) * (y - meanY)) x y |> Array.sum
         let denominator = Array.map (fun x -> (x - meanX) ** 2.0) x |> Array.sum
         Ok(numerator / denominator)
+
+// DATE ROUNDING
+let roundDown (date: DateTime) (interval: TimeSpan) =
+    if interval = TimeSpan.Zero then
+        date
+    else
+        date.AddTicks(-(date.Ticks % interval.Ticks))
