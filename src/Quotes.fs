@@ -4,8 +4,6 @@ open Incremental.Indicators.Series
 open Incremental.Indicators.Types
 open System
 open FSharp.Data.Adaptive
-open System.Globalization
-open System.Collections.ObjectModel
 
 let fromCsv path = failwith "todo"
 let fromJSON json = failwith "todo"
@@ -42,6 +40,23 @@ type internal QuoteD =
       Low: double
       Close: double
       Volume: double }
+
+type IBasicData =
+    abstract Date: DateTime
+    abstract Value: double
+
+type BasicData =
+    { Date: DateTime
+      Value: double }
+
+    interface IBasicData with
+        member this.Date = this.Date
+        member this.Value = this.Value
+//    TODO uncomment this once Result module is complete
+//    interface IReusableResult with
+//        member this.Value = box this.Value }
+
+
 
 //validate there are no quotes with duplicate dates
 let validate<'TQuote when 'TQuote :> IQuote> (quotes: seq<'TQuote>) : Result<seq<'TQuote>, string> =
@@ -110,7 +125,7 @@ let toSortedTupleArray (tuples: seq<DateTime * double>) =
 // DOUBLE QUOTES
 
 // convert to quotes in double precision
-let toQuoteDList<'TQuote when 'TQuote :> IQuote> (quotes: seq<'TQuote>) : QuoteD list =
+let internal toQuoteDList<'TQuote when 'TQuote :> IQuote> (quotes: seq<'TQuote>) : QuoteD list =
     quotes
     |> Seq.map (fun x ->
         { Date = x.Date
@@ -122,13 +137,52 @@ let toQuoteDList<'TQuote when 'TQuote :> IQuote> (quotes: seq<'TQuote>) : QuoteD
     |> Seq.sortBy (fun x -> x.Date)
     |> Seq.toList
 
+let internal quoteDtoTuple (q: QuoteD) (candlePart: CandlePart) =
+    match candlePart with
+    | CandlePart.Open -> (q.Date, q.Open)
+    | CandlePart.High -> (q.Date, q.High)
+    | CandlePart.Low -> (q.Date, q.Low)
+    | CandlePart.Close -> (q.Date, q.Close)
+    | CandlePart.Volume -> (q.Date, q.Volume)
+    | CandlePart.HL2 -> (q.Date, (q.High + q.Low) / 2.0)
+    | CandlePart.HLC3 -> (q.Date, (q.High + q.Low + q.Close) / 3.0)
+    | CandlePart.OC2 -> (q.Date, (q.Open + q.Close) / 2.0)
+    | CandlePart.OHL3 -> (q.Date, (q.Open + q.High + q.Low) / 3.0)
+    | CandlePart.OHLC4 -> (q.Date, (q.Open + q.High + q.Low + q.Close) / 4.0)
 // convert quoteD list to tuples
-let toTupleListFromQuoteDList (qdList: QuoteD list) (candlePart: CandlePart) : (DateTime * float) list =
+let internal quoteDListToToTuples (qdList: QuoteD list) (candlePart: CandlePart) =
     qdList
     |> Seq.sortBy (fun x -> x.Date)
-    |> Seq.map (fun x -> x.ToTuple(candlePart))
+    |> Seq.map (fun x -> quoteDtoTuple x candlePart)
     |> Seq.toList
 
+/// Convert TQuote element to basic data record
+let toBasicData<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (q: 'TQuote) =
+    match candlePart with
+    | CandlePart.Open -> { Date = q.Date; Value = double q.Open }
+    | CandlePart.High -> { Date = q.Date; Value = double q.High }
+    | CandlePart.Low -> { Date = q.Date; Value = double q.Low }
+    | CandlePart.Close ->
+        { Date = q.Date
+          Value = double q.Close }
+    | CandlePart.Volume ->
+        { Date = q.Date
+          Value = double q.Volume }
+    | CandlePart.HL2 ->
+        { Date = q.Date
+          Value = (double (q.High + q.Low) / 2.0) }
+    | CandlePart.HLC3 ->
+        { Date = q.Date
+          Value = (double (q.High + q.Low + q.Close) / 3.0) }
+    | CandlePart.OC2 ->
+        { Date = q.Date
+          Value = (double (q.Open + q.Close) / 2.0) }
+    | CandlePart.OHL3 ->
+        { Date = q.Date
+          Value = (double (q.Open + q.High + q.Low) / 3.0) }
+    | CandlePart.OHLC4 ->
+        { Date = q.Date
+          Value = (double (q.Open + q.High + q.Low + q.Close) / 4.0) }
 
 
 let private _quotesList: cset<Quote> = cset []
