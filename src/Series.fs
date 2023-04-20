@@ -25,7 +25,7 @@ let toSortedList<'TSeries when 'TSeries :> ISeries> (series: seq<'TSeries>) =
     series |> Seq.sortBy (fun s -> s.Date) |> Seq.toList
 
 // SEEK & FIND in SERIES// SEEK & FIND in SERIES
-let Find<'TSeries when 'TSeries :> ISeries> (series: seq<'TSeries>) (lookupDate: DateTime) : 'TSeries option =
+let find<'TSeries when 'TSeries :> ISeries> (series: seq<'TSeries>) (lookupDate: DateTime) : 'TSeries option =
     series |> Seq.tryFind (fun x -> x.Date = lookupDate)
 
 
