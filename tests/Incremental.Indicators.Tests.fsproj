@@ -7,7 +7,7 @@
         <RootNamespace>Incremental.Indicators.Tests</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="Numerix.fs" />
+        <Compile Include="Calc.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
