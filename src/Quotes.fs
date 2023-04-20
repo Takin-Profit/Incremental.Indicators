@@ -79,25 +79,33 @@ let quoteToTuple<'TQuote when 'TQuote :> IQuote> (q: 'TQuote) (candlePart: Candl
     | CandlePart.OHL3 -> (q.Date, double (q.Open + q.High + q.Low) / 3.0)
     | CandlePart.OHLC4 -> (q.Date, double (q.Open + q.High + q.Low + q.Close) / 4.0)
 
-// convert Quotes to seq<DateTime * double>
-let toTupleSeq<'TQuote when 'TQuote :> IQuote> (quotes: seq<'TQuote>) (candlePart: CandlePart) =
+// convert seq<Quote> to seq<DateTime * double>
+// same as https://github.com/DaveSkender/Stock.Indicators/blob/1ffd1333e00593e94ae6c7a9c6ff04acb3f48d1e/src/_common/Quotes/Quote.Converters.cs#L17
+let toTupleSeq<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (quotes: seq<'TQuote>) =
     quotes |> Seq.map (fun x -> quoteToTuple x candlePart)
 
-let toSortedList<'TQuote when 'TQuote :> IQuote> (quotes: seq<DateTime * double>) (candlePart: CandlePart) =
-    quotes |> Seq.sortBy (fst) |> Seq.toList
-// TUPLE QUOTES
+// convert seq<Quote> to (DateTime * double) list sorted by date
 
-// convert quotes to tuple list
-let toTupleCollection<'TQuote when 'TQuote :> IQuote> (quotes: seq<'TQuote>) (candlePart: CandlePart) =
-    quotes |> QuoteUtility.ToTupleList(candlePart) |> Seq.toCollection
+let quotesToSortedList<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (quotes: seq<'TQuote>) =
+    quotes
+    |> Seq.sortBy (fun x -> x.Date)
+    |> Seq.map (fun x -> quoteToTuple x candlePart)
+    |> List.ofSeq
 
+// convert seq<DateTime * double> to (DateTime * double) list sorted by date
+let toSortedList<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (quotes: seq<DateTime * double>) =
+    quotes |> Seq.sortBy fst |> Seq.toList
 
-// convert tuples to list, with sorting
-let toSortedCollection (tuples: seq<DateTime * float>) : Collection<DateTime * float> =
-    tuples |> toSortedList |> Seq.toCollection
+// convert seq<Quote> to (Quote * double) array
+let toTupleArray<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (quotes: seq<'TQuote>) =
+    toTupleSeq candlePart quotes |> Array.ofSeq
 
-let toSortedList (tuples: seq<DateTime * float>) : (DateTime * float) list =
-    tuples |> Seq.sortBy (fun x -> x |> fst) |> Seq.toList
+// convert seq<DateTime * double> to (DateTime * double) list sorted by date
+let tuplesToSortedList (tuples: seq<DateTime * double>) = tuples |> Seq.sortBy fst |> Seq.toList
+
+// convert seq<DateTime * double> to (DateTime * double) array sorted by date
+let toSortedTupleArray (tuples: seq<DateTime * double>) =
+    tuples |> tuplesToSortedList |> Array.ofList
 
 // DOUBLE QUOTES
 
