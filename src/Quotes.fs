@@ -83,23 +83,14 @@ let quoteToTuple<'TQuote when 'TQuote :> IQuote> (q: 'TQuote) (candlePart: Candl
 let toTupleSeq<'TQuote when 'TQuote :> IQuote> (quotes: seq<'TQuote>) (candlePart: CandlePart) =
     quotes |> Seq.map (fun x -> quoteToTuple x candlePart)
 
+let toSortedList<'TQuote when 'TQuote :> IQuote> (quotes: seq<DateTime * double>) (candlePart: CandlePart) =
+    quotes |> Seq.sortBy (fst) |> Seq.toList
 // TUPLE QUOTES
 
 // convert quotes to tuple list
-let toTupleCollection<'TQuote when 'TQuote :> IQuote>
-    (quotes: seq<'TQuote>)
-    (candlePart: CandlePart)
-    : Collection<DateTime * float> =
+let toTupleCollection<'TQuote when 'TQuote :> IQuote> (quotes: seq<'TQuote>) (candlePart: CandlePart) =
     quotes |> QuoteUtility.ToTupleList(candlePart) |> Seq.toCollection
 
-let toTupleList<'TQuote when 'TQuote :> IQuote>
-    (quotes: seq<'TQuote>)
-    (candlePart: CandlePart)
-    : (DateTime * float) list =
-    quotes
-    |> Seq.sortBy (fun x -> x.Date)
-    |> Seq.map (fun x -> x.ToTuple(candlePart))
-    |> Seq.toList
 
 // convert tuples to list, with sorting
 let toSortedCollection (tuples: seq<DateTime * float>) : Collection<DateTime * float> =
