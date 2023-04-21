@@ -562,3 +562,124 @@ let quoteDListToToTuplesTests =
                     (DateTime(2022, 1, 3), 19.0) ]
 
               Expect.sequenceEqual (quoteDListToToTuples CandlePart.OC2 qdList) expected "returns correct results" ]
+
+[<Tests>]
+let toBasicDataTests =
+
+    // define some test data
+    let testQuote1 =
+        { Quote.Date = DateTime(2021, 4, 21)
+          Open = 100.0M
+          High = 150.0M
+          Low = 75.0M
+          Close = 125.0M
+          Volume = 10000.0M }
+
+    let testQuote2 =
+        { Quote.Date = DateTime(2021, 4, 22)
+          Open = 200.0M
+          High = 250.0M
+          Low = 175.0M
+          Close = 225.0M
+          Volume = 20000.0M }
+
+    let testQuote3 =
+        { Quote.Date = DateTime(2021, 4, 23)
+          Open = 300.0M
+          High = 350.0M
+          Low = 275.0M
+          Close = 325.0M
+          Volume = 30000.0M }
+
+    testList
+        "toBasicData tests"
+        [
+          // test converting Open
+          testCase "Open"
+          <| fun () ->
+              let expected =
+                  { Date = testQuote1.Date
+                    Value = 100.0 }
+
+              let actual = toBasicData CandlePart.Open testQuote1
+              Expect.equal actual expected "should convert properly"
+
+          // test converting High
+          testCase "High"
+          <| fun () ->
+              let expected =
+                  { Date = testQuote2.Date
+                    Value = 250.0 }
+
+              let actual = toBasicData CandlePart.High testQuote2
+              Expect.equal actual expected "should convert properly"
+
+          // test converting Low
+          testCase "Low"
+          <| fun () ->
+              let expected =
+                  { Date = testQuote3.Date
+                    Value = 275.0 }
+
+              let actual = toBasicData CandlePart.Low testQuote3
+              Expect.equal actual expected "should convert properly"
+
+          // test converting Close
+          testCase "Close"
+          <| fun () ->
+              let expected =
+                  { Date = testQuote1.Date
+                    Value = 125.0 }
+
+              let actual = toBasicData CandlePart.Close testQuote1
+              Expect.equal actual expected "should convert properly"
+
+          // test converting Volume
+          testCase "Volume"
+          <| fun () ->
+              let expected =
+                  { Date = testQuote2.Date
+                    Value = 20000.0 }
+
+              let actual = toBasicData CandlePart.Volume testQuote2
+              Expect.equal actual expected "should convert properly"
+
+          // test converting HL2
+          testCase "HL2"
+          <| fun () ->
+              let expected =
+                  { Date = testQuote3.Date
+                    Value = 312.5 }
+
+              let actual = toBasicData CandlePart.HL2 testQuote3
+              Expect.equal actual expected "should convert properly"
+
+          // test converting HLC3
+          testCase "HLC3"
+          <| fun () ->
+              let expected =
+                  { Date = testQuote1.Date
+                    Value = 116.66666666666667 }
+
+              let actual = toBasicData CandlePart.HLC3 testQuote1
+              Expect.equal actual expected "should convert properly"
+
+          // test converting OHL3
+          testCase "OHL3"
+          <| fun () ->
+              let expected =
+                  { Date = testQuote3.Date
+                    Value = 308.3333333 }
+
+              let actual = toBasicData CandlePart.OHL3 testQuote3
+              Expect.floatClose Accuracy.medium actual.Value expected.Value "should convert properly"
+
+          // test converting OC2
+          testCase "OC2"
+          <| fun () ->
+              let expected =
+                  { Date = testQuote2.Date
+                    Value = 212.5 }
+
+              let actual = toBasicData CandlePart.OC2 testQuote2
+              Expect.equal actual expected "should convert properly" ]
