@@ -70,3 +70,31 @@ let syncIndex syncMe toMatch syncType =
             syncMeList <- List.fold (fun acc x -> if toRemove |> List.contains x then acc else x :: acc) [] syncMeList
 
         syncMeList |> List.sortBy (fun x -> x.Date)
+
+let inline checkNull v =
+    match box v with
+    | null -> true
+    | :? double as d when Double.IsNaN(d) -> true
+    | _ -> false
+
+let nullToNaN (value: double option) =
+    match value with
+    | Some x -> x
+    | None -> Double.NaN
+
+let condense<'TResult when 'TResult :> IReusableResult> (results: seq<'TResult>) =
+    let resultsList = results |> List.ofSeq
+
+    let filteredResultsList =
+        resultsList |> List.filter (fun x -> not (checkNull x.Value))
+
+    filteredResultsList |> List.sortBy (fun x -> x.Date) |> Seq.ofList
+
+let toTupleChainable (reusable: seq<IReusableResult>) : seq<DateTime * double> =
+    reusable
+    |> Seq.filter (fun x -> not (checkNull x.Value))
+    |> Seq.map (fun x -> x.Date, nullToNaN x.Value)
+
+
+let toTupleNaN (reusable: seq<IReusableResult>) : seq<DateTime * double> =
+    reusable |> Seq.map (fun x -> x.Date, nullToNaN x.Value)
