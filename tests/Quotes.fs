@@ -109,7 +109,7 @@ let testsList3 =
           <| fun _ ->
               let expected = [||]
               let actual = toTupleArray CandlePart.Open Seq.empty
-              Expect.sequenceEqual expected actual "should be empty"
+              Expect.sequenceEqual actual expected "should be empty"
 
           testCase "single item input"
           <| fun _ ->
@@ -127,7 +127,7 @@ let testsList3 =
                   }
 
               let actual = toTupleArray CandlePart.Open quotes
-              Expect.sequenceEqual expected actual "should match"
+              Expect.sequenceEqual actual expected "should match"
 
           testCase "multiple item input"
           <| fun _ ->
@@ -164,7 +164,7 @@ let testsList3 =
                   }
 
               let actual = toTupleArray CandlePart.Open quotes
-              Expect.sequenceEqual expected actual "sequences should match." ]
+              Expect.sequenceEqual actual expected "sequences should match." ]
 
 [<Tests>]
 let testsList4 =
@@ -316,7 +316,7 @@ let quoteDtoTupleTests =
                         Volume = 100.0 }
                       CandlePart.Open
 
-              Expect.equal expected actual "Open quoteDtoTuple returns expected value"
+              Expect.equal actual expected "Open quoteDtoTuple returns expected value"
           }
 
           test "High quoteDtoTuple test" {
@@ -332,7 +332,7 @@ let quoteDtoTupleTests =
                         Volume = 100.0 }
                       CandlePart.High
 
-              Expect.equal expected actual "High quoteDtoTuple returns expected value"
+              Expect.equal actual expected "High quoteDtoTuple returns expected value"
           }
 
           test "Low quoteDtoTuple test" {
@@ -348,7 +348,7 @@ let quoteDtoTupleTests =
                         Volume = 100.0 }
                       CandlePart.Low
 
-              Expect.equal expected actual "Low quoteDtoTuple returns expected value"
+              Expect.equal actual expected "Low quoteDtoTuple returns expected value"
           }
 
           test "Close quoteDtoTuple test" {
@@ -364,7 +364,7 @@ let quoteDtoTupleTests =
                         Volume = 100.0 }
                       CandlePart.Close
 
-              Expect.equal expected actual "Close quoteDtoTuple returns expected value"
+              Expect.equal actual expected "Close quoteDtoTuple returns expected value"
           }
 
           test "Volume quoteDtoTuple test" {
@@ -380,7 +380,7 @@ let quoteDtoTupleTests =
                         Volume = 100.0 }
                       CandlePart.Volume
 
-              Expect.equal expected actual "Volume quoteDtoTuple returns expected value"
+              Expect.equal actual expected "Volume quoteDtoTuple returns expected value"
           }
 
           test "HL2 quoteDtoTuple test" {
@@ -396,7 +396,7 @@ let quoteDtoTupleTests =
                         Volume = 100.0 }
                       CandlePart.HL2
 
-              Expect.equal expected actual "HL2 quoteDtoTuple returns expected value"
+              Expect.equal actual expected "HL2 quoteDtoTuple returns expected value"
           }
 
           test "HLC3 quoteDtoTuple test" {
@@ -412,7 +412,7 @@ let quoteDtoTupleTests =
                         Volume = 100.0 }
                       CandlePart.HLC3
 
-              Expect.equal expected actual "HLC3 quoteDtoTuple"
+              Expect.equal actual expected "HLC3 quoteDtoTuple"
           }
 
           test "OC2" {
@@ -478,3 +478,87 @@ let quoteDtoTupleTests =
 
               Expect.equal result (q.Date, 12.5) "OLC4 results"
           } ]
+
+[<Tests>]
+let quoteDListToToTuplesTests =
+    testList
+        "quoteDListToToTuples"
+        [ testCase "Empty List"
+          <| fun _ ->
+              let emptyList = []
+              let result = quoteDListToToTuples CandlePart.Close emptyList
+              Expect.sequenceEqual result [] "list is empty"
+
+          testCase "Single QuoteD"
+          <| fun _ ->
+              let singleQuoteD =
+                  { Date = DateTime.Now
+                    Open = 10.0
+                    High = 20.0
+                    Low = 5.0
+                    Close = 15.0
+                    Volume = 100.0 }
+
+              let qdList = [ singleQuoteD ]
+              let expected = [ (singleQuoteD.Date, singleQuoteD.Close) ]
+              let result = quoteDListToToTuples CandlePart.Close qdList
+              Expect.sequenceEqual result expected "list matches"
+
+          testCase "Multiple QuoteD"
+          <| fun _ ->
+              let qdList =
+                  [ { Date = DateTime.Now.AddDays(-3.0)
+                      Open = 10.0
+                      High = 20.0
+                      Low = 5.0
+                      Close = 15.0
+                      Volume = 100.0 }
+                    { Date = DateTime.Now.AddDays(-2.0)
+                      Open = 15.0
+                      High = 25.0
+                      Low = 10.0
+                      Close = 20.0
+                      Volume = 200.0 }
+                    { Date = DateTime.Now.AddDays(-1.0)
+                      Open = 20.0
+                      High = 30.0
+                      Low = 15.0
+                      Close = 25.0
+                      Volume = 300.0 } ]
+
+              let expected =
+                  [ (qdList[0].Date, qdList[0].Close)
+                    (qdList[1].Date, qdList[1].Close)
+                    (qdList[2].Date, qdList[2].Close) ]
+
+              let result = quoteDListToToTuples CandlePart.Close qdList
+              Expect.sequenceEqual result expected "results are as expected"
+
+          testCase "OC2 returns expected results"
+          <| fun _ ->
+              let qdList =
+                  [ { Date = DateTime(2022, 1, 1)
+                      Open = 10.0
+                      High = 15.0
+                      Low = 5.0
+                      Close = 12.0
+                      Volume = 1000.0 }
+                    { Date = DateTime(2022, 1, 2)
+                      Open = 12.0
+                      High = 20.0
+                      Low = 8.0
+                      Close = 18.0
+                      Volume = 1500.0 }
+                    { Date = DateTime(2022, 1, 3)
+                      Open = 18.0
+                      High = 25.0
+                      Low = 15.0
+                      Close = 20.0
+                      Volume = 2000.0 } ]
+
+              let expected =
+                  [ (DateTime(2022, 1, 1), 11.0)
+                    (DateTime(2022, 1, 2), 15.0)
+                    (DateTime(2022, 1, 3), 19.0) ]
+
+              Expect.sequenceEqual (quoteDListToToTuples CandlePart.OC2 qdList) expected "returns correct results" ]
