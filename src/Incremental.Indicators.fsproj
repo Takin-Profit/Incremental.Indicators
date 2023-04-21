@@ -8,8 +8,8 @@
     <ItemGroup>
         <Compile Include="Library.fs" />
         <Compile Include="Candles.fs" />
-        <Compile Include="Results.fs" />
         <Compile Include="Series.fs" />
+        <Compile Include="Results.fs" />
         <Compile Include="Types.fs" />
         <Compile Include="Calc.fs" />
         <Compile Include="Quotes.fs" />
