@@ -683,3 +683,94 @@ let toBasicDataTests =
 
               let actual = toBasicData CandlePart.OC2 testQuote2
               Expect.equal actual expected "should convert properly" ]
+
+[<Tests>]
+let aggregateTests =
+    testList
+        "aggregateByTimeSpan tests"
+        [
+
+          testCase "When quotes is empty, return empty"
+          <| fun () ->
+              let input = Seq.empty
+              let timeSpan = TimeSpan.FromMinutes 5.0
+              let actual = aggregateByTimeSpan timeSpan input
+              let expected = Ok(Seq.empty)
+              Expect.equal actual expected "array should be empty"
+
+          testCase "When timespan is negative, return error"
+          <| fun () ->
+              let input =
+                  Seq.singleton
+                      { Quote.Date = DateTime.Now
+                        Open = 1M
+                        High = 2M
+                        Low = 0.5M
+                        Close = 1.5M
+                        Volume = 1000M }
+
+              let timeSpan = TimeSpan.FromMinutes -5.0
+              let actual = aggregateByTimeSpan timeSpan input
+              Expect.isError actual "should return an error"
+
+          testCase "When timespan is positive, return aggregated quotes"
+          <| fun () ->
+              let input =
+                  Seq.init 4 (fun i ->
+                      { Quote.Date = DateTime(2023, 4, 1, 12, 15, 0).AddDays(float i)
+                        Open = decimal (i + 1)
+                        High = decimal (i + 2)
+                        Low = decimal i
+                        Close = decimal (i + 1)
+                        Volume = 1000M })
+
+              let timeSpan = TimeSpan.FromDays 1.0
+              let actual = aggregateByTimeSpan timeSpan input
+              Expect.isOk actual "should return aggregated quotes" ]
+
+[<Tests>]
+let aggregateByTimeFrameTests =
+    let testData =
+        [ { Quote.Date = DateTime(2022, 1, 1)
+            Open = 1m
+            High = 2m
+            Low = 0.5m
+            Close = 1.5m
+            Volume = 10m }
+          { Date = DateTime(2022, 1, 2)
+            Open = 1.5m
+            High = 3m
+            Low = 1m
+            Close = 2m
+            Volume = 15m }
+          { Date = DateTime(2022, 1, 3)
+            Open = 2m
+            High = 3.5m
+            Low = 1.5m
+            Close = 3m
+            Volume = 20m }
+          { Date = DateTime(2022, 1, 4)
+            Open = 3m
+            High = 4.5m
+            Low = 2.5m
+            Close = 4m
+            Volume = 25m } ]
+
+    testList
+        "aggregateByTimeFrame"
+        [
+
+          test "Aggregating by 12 hours should result in four items" {
+              let result = aggregateByTimeSpan (TimeSpan.FromHours 12) testData
+              Expect.equal (result |> Result.map Seq.length) (Ok 4) "should result in four items"
+          }
+
+          test "Aggregating by zero time should result in an error" {
+              let result = aggregateByTimeSpan TimeSpan.Zero testData
+
+              Expect.equal
+                  result
+                  (Error
+                      "Quotes Aggregation must use a usable new size value (see documentation for options). Value: 00:00:00")
+                  "should be an error"
+          } ]
