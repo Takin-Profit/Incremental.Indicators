@@ -234,6 +234,7 @@ let tests5 =
 
               Expect.sequenceEqual actual expected "multiple tuples input failed" ]
 
+[<Tests>]
 let toQuoteDListTests =
     testList
         "toQuoteDList tests"
@@ -295,3 +296,185 @@ let toQuoteDListTests =
 
               let actualOutput = toQuoteDList input
               Expect.sequenceEqual actualOutput expectedOutput "should have correct values" ]
+
+[<Tests>]
+let quoteDtoTupleTests =
+    testList
+        "quoteDtoTuple tests"
+        [
+
+          test "Open quoteDtoTuple test" {
+              let expected = (DateTime(2022, 1, 1), 10.0)
+
+              let actual =
+                  quoteDtoTuple
+                      { Date = DateTime(2022, 1, 1)
+                        Open = 10.0
+                        High = 12.0
+                        Low = 9.0
+                        Close = 11.0
+                        Volume = 100.0 }
+                      CandlePart.Open
+
+              Expect.equal expected actual "Open quoteDtoTuple returns expected value"
+          }
+
+          test "High quoteDtoTuple test" {
+              let expected = (DateTime(2022, 1, 1), 12.0)
+
+              let actual =
+                  quoteDtoTuple
+                      { Date = DateTime(2022, 1, 1)
+                        Open = 10.0
+                        High = 12.0
+                        Low = 9.0
+                        Close = 11.0
+                        Volume = 100.0 }
+                      CandlePart.High
+
+              Expect.equal expected actual "High quoteDtoTuple returns expected value"
+          }
+
+          test "Low quoteDtoTuple test" {
+              let expected = (DateTime(2022, 1, 1), 9.0)
+
+              let actual =
+                  quoteDtoTuple
+                      { Date = DateTime(2022, 1, 1)
+                        Open = 10.0
+                        High = 12.0
+                        Low = 9.0
+                        Close = 11.0
+                        Volume = 100.0 }
+                      CandlePart.Low
+
+              Expect.equal expected actual "Low quoteDtoTuple returns expected value"
+          }
+
+          test "Close quoteDtoTuple test" {
+              let expected = (DateTime(2022, 1, 1), 11.0)
+
+              let actual =
+                  quoteDtoTuple
+                      { Date = DateTime(2022, 1, 1)
+                        Open = 10.0
+                        High = 12.0
+                        Low = 9.0
+                        Close = 11.0
+                        Volume = 100.0 }
+                      CandlePart.Close
+
+              Expect.equal expected actual "Close quoteDtoTuple returns expected value"
+          }
+
+          test "Volume quoteDtoTuple test" {
+              let expected = (DateTime(2022, 1, 1), 100.0)
+
+              let actual =
+                  quoteDtoTuple
+                      { Date = DateTime(2022, 1, 1)
+                        Open = 10.0
+                        High = 12.0
+                        Low = 9.0
+                        Close = 11.0
+                        Volume = 100.0 }
+                      CandlePart.Volume
+
+              Expect.equal expected actual "Volume quoteDtoTuple returns expected value"
+          }
+
+          test "HL2 quoteDtoTuple test" {
+              let expected = (DateTime(2022, 1, 1), 10.5)
+
+              let actual =
+                  quoteDtoTuple
+                      { Date = DateTime(2022, 1, 1)
+                        Open = 10.0
+                        High = 12.0
+                        Low = 9.0
+                        Close = 11.0
+                        Volume = 100.0 }
+                      CandlePart.HL2
+
+              Expect.equal expected actual "HL2 quoteDtoTuple returns expected value"
+          }
+
+          test "HLC3 quoteDtoTuple test" {
+              let expected = (DateTime(2022, 1, 1), 10.666666666666666)
+
+              let actual =
+                  quoteDtoTuple
+                      { Date = DateTime(2022, 1, 1)
+                        Open = 10.0
+                        High = 12.0
+                        Low = 9.0
+                        Close = 11.0
+                        Volume = 100.0 }
+                      CandlePart.HLC3
+
+              Expect.equal expected actual "HLC3 quoteDtoTuple"
+          }
+
+          test "OC2" {
+              let q =
+                  { Date = DateTime.Now
+                    Open = 10.0
+                    High = 20.0
+                    Low = 5.0
+                    Close = 15.0
+                    Volume = 100.0 }
+
+              let result =
+                  quoteDtoTuple
+                      { Date = q.Date
+                        Open = float q.Open
+                        High = float q.High
+                        Low = float q.Low
+                        Close = float q.Close
+                        Volume = float q.Volume }
+                      CandlePart.OC2
+
+              Expect.equal result (q.Date, 12.5) "OC2 quoteDtoTuple"
+          }
+          test "OHL3" {
+              let q =
+                  { Date = DateTime.Now
+                    Open = 10.0
+                    High = 20.0
+                    Low = 5.0
+                    Close = 15.0
+                    Volume = 100.0 }
+
+              let result =
+                  quoteDtoTuple
+                      { Date = q.Date
+                        Open = float q.Open
+                        High = float q.High
+                        Low = float q.Low
+                        Close = float q.Close
+                        Volume = float q.Volume }
+                      CandlePart.OHL3
+
+              Expect.equal result (q.Date, 11.666666666666666) "OHL3 results"
+          }
+          test "OHLC4" {
+              let q =
+                  { Date = DateTime.Now
+                    Open = 10.0
+                    High = 20.0
+                    Low = 5.0
+                    Close = 15.0
+                    Volume = 100.0 }
+
+              let result =
+                  quoteDtoTuple
+                      { Date = q.Date
+                        Open = float q.Open
+                        High = float q.High
+                        Low = float q.Low
+                        Close = float q.Close
+                        Volume = float q.Volume }
+                      CandlePart.OHLC4
+
+              Expect.equal result (q.Date, 12.5) "OLC4 results"
+          } ]

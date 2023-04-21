@@ -139,7 +139,7 @@ let internal quoteDtoTuple (q: QuoteD) (candlePart: CandlePart) =
     | CandlePart.OHL3 -> (q.Date, (q.Open + q.High + q.Low) / 3.0)
     | CandlePart.OHLC4 -> (q.Date, (q.Open + q.High + q.Low + q.Close) / 4.0)
 // convert quoteD list to tuples
-let internal quoteDListToToTuples (qdList: QuoteD list) (candlePart: CandlePart) =
+let internal quoteDListToToTuples (candlePart: CandlePart) (qdList: QuoteD list) =
     qdList
     |> Seq.sortBy (fun x -> x.Date)
     |> Seq.map (fun x -> quoteDtoTuple x candlePart)
