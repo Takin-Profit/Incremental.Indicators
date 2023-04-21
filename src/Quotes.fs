@@ -99,7 +99,8 @@ let quotesToSortedList (candlePart: CandlePart) (quotes: seq<Quote>) =
 // convert seq<DateTime * double> to (DateTime * double) list sorted by date
 let toSortedList (candlePart: CandlePart) (quotes: seq<DateTime * double>) = quotes |> Seq.sortBy fst |> Seq.toList
 
-// convert seq<Quote> to (Quote * double) array
+// convert seq<Quote> to (DateTime * double) array
+// same as https://github.com/DaveSkender/Stock.Indicators/blob/1ffd1333e00593e94ae6c7a9c6ff04acb3f48d1e/src/_common/Quotes/Quote.Converters.cs#L84
 let toTupleArray (candlePart: CandlePart) (quotes: seq<Quote>) =
     toTupleSeq candlePart quotes |> Array.ofSeq
 

@@ -3,20 +3,26 @@ module Incremental.Indicators.SMA
 open System
 open FSharp.Data.Adaptive
 
+type Quote =
+    { Date: DateTime
+      Open: decimal
+      High: decimal
+      Low: decimal
+      Close: decimal
+      Volume: decimal }
+
 type SMAResult = { Date: DateTime; Sma: double }
-let mutable private _results: aset<SMAResult> = cset []
 
-let results = _results
+type SMA(quotes: cset<Quote>) as x =
+    // Example of where the SMA the actual calculation would happen
+    let mutable _results: aset<SMAResult> =
+        x.Quotes
+        |> ASet.map (fun (x: Quote) ->
+            { Date = x.Date
+              Sma = x.Close * x.Volume |> double }
 
-let calculate =
-    _results <- Quotes.all |> ASet.map (fun r -> { Date = DateTime.Now; Sma = 0.0 })
-    AVal.force results.Content
+        )
 
-let recalculate =
-    Quotes.all |> ASet.map id
-    AVal.force results.Content
+    member x.results = AVal.force _results.Content
 
-
-let toTimeSpan periodSize =
-    match periodSize with
-    | "1" -> TimeSpan.Zero
+    member private x.Quotes = quotes
