@@ -3,6 +3,7 @@ module Incremental.Indicators.Series
 open System
 open System.Collections.ObjectModel
 
+[<Interface>]
 type ISeries =
     abstract Date: DateTime
 

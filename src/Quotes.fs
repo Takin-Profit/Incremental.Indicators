@@ -2,19 +2,12 @@ module Incremental.Indicators.Quotes
 
 open Incremental.Indicators.Series
 open Incremental.Indicators.Types
+open Incremental.Indicators.Calc
 open System
 open FSharp.Data.Adaptive
 
 let fromCsv path = failwith "todo"
 let fromJSON json = failwith "todo"
-
-type IQuote =
-    inherit ISeries
-    abstract Open: decimal with get
-    abstract High: decimal with get
-    abstract Low: decimal with get
-    abstract Close: decimal with get
-    abstract Volume: decimal with get
 
 
 type Quote =
@@ -25,13 +18,9 @@ type Quote =
       Close: decimal
       Volume: decimal }
 
-    interface IQuote with
+    interface ISeries with
         member this.Date = this.Date
-        member this.Close = this.Close
-        member this.High = this.High
-        member this.Low = this.Low
-        member this.Open = this.Open
-        member this.Volume = this.Volume
+
 
 type internal QuoteD =
     { Date: DateTime
@@ -59,7 +48,7 @@ type BasicData =
 
 
 //validate there are no quotes with duplicate dates
-let validate<'TQuote when 'TQuote :> IQuote> (quotes: seq<'TQuote>) : Result<seq<'TQuote>, string> =
+let validate (quotes: seq<Quote>) : Result<seq<Quote>, string> =
     // we cannot rely on date consistency when looking back, so we force sort
     let sortedQuotes = toSortedList quotes
 
@@ -81,7 +70,7 @@ let nativeCulture = System.Threading.Thread.CurrentThread.CurrentUICulture
 
 // STANDARD DECIMAL QUOTES
 // convert TQuote element to basic tuple
-let quoteToTuple<'TQuote when 'TQuote :> IQuote> (q: 'TQuote) (candlePart: CandlePart) =
+let quoteToTuple (q: Quote) (candlePart: CandlePart) =
     match candlePart with
     | CandlePart.Open -> (q.Date, double q.Open)
     | CandlePart.High -> (q.Date, double q.High)
@@ -96,23 +85,22 @@ let quoteToTuple<'TQuote when 'TQuote :> IQuote> (q: 'TQuote) (candlePart: Candl
 
 // convert seq<Quote> to seq<DateTime * double>
 // same as https://github.com/DaveSkender/Stock.Indicators/blob/1ffd1333e00593e94ae6c7a9c6ff04acb3f48d1e/src/_common/Quotes/Quote.Converters.cs#L17
-let toTupleSeq<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (quotes: seq<'TQuote>) =
+let toTupleSeq (candlePart: CandlePart) (quotes: seq<Quote>) =
     quotes |> Seq.map (fun x -> quoteToTuple x candlePart)
 
 // convert seq<Quote> to (DateTime * double) list sorted by date
 
-let quotesToSortedList<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (quotes: seq<'TQuote>) =
+let quotesToSortedList (candlePart: CandlePart) (quotes: seq<Quote>) =
     quotes
     |> Seq.sortBy (fun x -> x.Date)
     |> Seq.map (fun x -> quoteToTuple x candlePart)
     |> List.ofSeq
 
 // convert seq<DateTime * double> to (DateTime * double) list sorted by date
-let toSortedList<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (quotes: seq<DateTime * double>) =
-    quotes |> Seq.sortBy fst |> Seq.toList
+let toSortedList (candlePart: CandlePart) (quotes: seq<DateTime * double>) = quotes |> Seq.sortBy fst |> Seq.toList
 
 // convert seq<Quote> to (Quote * double) array
-let toTupleArray<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (quotes: seq<'TQuote>) =
+let toTupleArray (candlePart: CandlePart) (quotes: seq<Quote>) =
     toTupleSeq candlePart quotes |> Array.ofSeq
 
 // convert seq<DateTime * double> to (DateTime * double) list sorted by date
@@ -125,7 +113,7 @@ let toSortedTupleArray (tuples: seq<DateTime * double>) =
 // DOUBLE QUOTES
 
 // convert to quotes in double precision
-let internal toQuoteDList<'TQuote when 'TQuote :> IQuote> (quotes: seq<'TQuote>) : QuoteD list =
+let internal toQuoteDList (quotes: seq<Quote>) : QuoteD list =
     quotes
     |> Seq.map (fun x ->
         { Date = x.Date
@@ -157,7 +145,7 @@ let internal quoteDListToToTuples (qdList: QuoteD list) (candlePart: CandlePart)
     |> Seq.toList
 
 /// Convert TQuote element to basic data record
-let toBasicData<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (q: 'TQuote) =
+let toBasicData (candlePart: CandlePart) (q: Quote) =
     match candlePart with
     | CandlePart.Open -> { Date = q.Date; Value = double q.Open }
     | CandlePart.High -> { Date = q.Date; Value = double q.High }
@@ -184,6 +172,30 @@ let toBasicData<'TQuote when 'TQuote :> IQuote> (candlePart: CandlePart) (q: 'TQ
         { Date = q.Date
           Value = (double (q.Open + q.High + q.Low + q.Close) / 4.0) }
 
+
+// aggregation (quantization) using TimeSpan>
+///
+let aggregate (timeSpan: TimeSpan) (quotes: seq<Quote>) =
+    // handle no quotes scenario
+    if Seq.isEmpty quotes then
+        Ok Seq.empty
+    else if timeSpan <= TimeSpan.Zero then
+        Error
+            $"Quotes Aggregation must use a usable new size value (see documentation for options). Value: %A{timeSpan}"
+    else
+        // return aggregation
+        quotes
+        |> Seq.sortBy (fun x -> x.Date)
+        |> Seq.groupBy (fun x -> roundDown x.Date timeSpan)
+        |> Seq.map (fun x ->
+            { Quote.Date = fst x
+              Open = Seq.head (snd x) |> fun t -> t.Open
+              Quote.High = Seq.maxBy (fun (t: Quote) -> t.High) (snd x) |> fun t -> t.High
+              Low = Seq.minBy (fun (t: Quote) -> t.Low) (snd x) |> fun t -> t.Low
+              Close = Seq.last (snd x) |> fun t -> t.Close
+              Volume = Seq.sumBy (fun (t: Quote) -> t.Volume) (snd x) })
+
+        |> Ok
 
 let private _quotesList: cset<Quote> = cset []
 
