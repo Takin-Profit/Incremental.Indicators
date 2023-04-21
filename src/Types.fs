@@ -46,6 +46,7 @@ type MaType =
 
 [<RequireQualifiedAccess>]
 type TimeFrame =
+    | Month
     | ThreeWeeks
     | TwoWeeks
     | Week
@@ -82,40 +83,43 @@ type TimeFrame =
     | ThreeMin
     | OneMin
 
-    member self.toTimeSpan() =
-        match self with
-        | ThreeWeeks -> TimeSpan.FromDays 21
-        | TwoWeeks -> TimeSpan.FromDays 14
-        | Week -> TimeSpan.FromDays 7
-        | ThirtyDays -> TimeSpan.FromDays 30
-        | TwentyDays -> TimeSpan.FromDays 20
-        | FifteenDays -> TimeSpan.FromDays 15
-        | TenDays -> TimeSpan.FromDays 10
-        | FiveDays -> TimeSpan.FromDays 5
-        | ThreeDays -> TimeSpan.FromDays 3
-        | TwoDays -> TimeSpan.FromDays 2
-        | OneDay -> TimeSpan.FromDays 1
-        | TwentyHours -> TimeSpan.FromHours 20
-        | EightTeenHours -> TimeSpan.FromHours 18
-        | SixteenHours -> TimeSpan.FromHours 16
-        | FourteenHours -> TimeSpan.FromHours 14
-        | TwelveHours -> TimeSpan.FromHours 12
-        | TenHours -> TimeSpan.FromHours 10
-        | EightHours -> TimeSpan.FromHours 8
-        | SixHours -> TimeSpan.FromHours 6
-        | FourHours -> TimeSpan.FromHours 4
-        | ThreeHours -> TimeSpan.FromHours 3
-        | TwoHours -> TimeSpan.FromHours 2
-        | OneHour -> TimeSpan.FromHours 1
-        | ThreeHundredNinetyMin -> TimeSpan.FromMinutes 390
-        | TwoHundredSixtyMin -> TimeSpan.FromMinutes 260
-        | OneHundredThirtyMin -> TimeSpan.FromMinutes 130
-        | SixtyFiveMin -> TimeSpan.FromMinutes 65
-        | FortyFiveMin -> TimeSpan.FromMinutes 45
-        | ThirtyMin -> TimeSpan.FromMinutes 30
-        | TwentyFourMin -> TimeSpan.FromMinutes 24
-        | FifteenMin -> TimeSpan.FromMinutes 15
-        | TwelveMin -> TimeSpan.FromMinutes 12
-        | FiveMin -> TimeSpan.FromMinutes 5
-        | ThreeMin -> TimeSpan.FromMinutes 3
-        | OneMin -> TimeSpan.FromMinutes 1
+let toTimeSpan timeFrame =
+    match timeFrame with
+    // Month TimeSpan will conversion is incorrect but will never get called
+    // this is here to satisfy the compiler
+    | TimeFrame.Month -> TimeSpan.FromDays 30
+    | TimeFrame.ThreeWeeks -> TimeSpan.FromDays 21
+    | TimeFrame.TwoWeeks -> TimeSpan.FromDays 14
+    | TimeFrame.Week -> TimeSpan.FromDays 7
+    | TimeFrame.ThirtyDays -> TimeSpan.FromDays 30
+    | TimeFrame.TwentyDays -> TimeSpan.FromDays 20
+    | TimeFrame.FifteenDays -> TimeSpan.FromDays 15
+    | TimeFrame.TenDays -> TimeSpan.FromDays 10
+    | TimeFrame.FiveDays -> TimeSpan.FromDays 5
+    | TimeFrame.ThreeDays -> TimeSpan.FromDays 3
+    | TimeFrame.TwoDays -> TimeSpan.FromDays 2
+    | TimeFrame.OneDay -> TimeSpan.FromDays 1
+    | TimeFrame.TwentyHours -> TimeSpan.FromHours 20
+    | TimeFrame.EightTeenHours -> TimeSpan.FromHours 18
+    | TimeFrame.SixteenHours -> TimeSpan.FromHours 16
+    | TimeFrame.FourteenHours -> TimeSpan.FromHours 14
+    | TimeFrame.TwelveHours -> TimeSpan.FromHours 12
+    | TimeFrame.TenHours -> TimeSpan.FromHours 10
+    | TimeFrame.EightHours -> TimeSpan.FromHours 8
+    | TimeFrame.SixHours -> TimeSpan.FromHours 6
+    | TimeFrame.FourHours -> TimeSpan.FromHours 4
+    | TimeFrame.ThreeHours -> TimeSpan.FromHours 3
+    | TimeFrame.TwoHours -> TimeSpan.FromHours 2
+    | TimeFrame.OneHour -> TimeSpan.FromHours 1
+    | TimeFrame.ThreeHundredNinetyMin -> TimeSpan.FromMinutes 390
+    | TimeFrame.TwoHundredSixtyMin -> TimeSpan.FromMinutes 260
+    | TimeFrame.OneHundredThirtyMin -> TimeSpan.FromMinutes 130
+    | TimeFrame.SixtyFiveMin -> TimeSpan.FromMinutes 65
+    | TimeFrame.FortyFiveMin -> TimeSpan.FromMinutes 45
+    | TimeFrame.ThirtyMin -> TimeSpan.FromMinutes 30
+    | TimeFrame.TwentyFourMin -> TimeSpan.FromMinutes 24
+    | TimeFrame.FifteenMin -> TimeSpan.FromMinutes 15
+    | TimeFrame.TwelveMin -> TimeSpan.FromMinutes 12
+    | TimeFrame.FiveMin -> TimeSpan.FromMinutes 5
+    | TimeFrame.ThreeMin -> TimeSpan.FromMinutes 3
+    | TimeFrame.OneMin -> TimeSpan.FromMinutes 1

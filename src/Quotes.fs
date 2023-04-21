@@ -175,7 +175,7 @@ let toBasicData (candlePart: CandlePart) (q: Quote) =
 
 // aggregation (quantization) using TimeSpan>
 ///
-let aggregate (timeSpan: TimeSpan) (quotes: seq<Quote>) =
+let aggregateByTimeSpan (timeSpan: TimeSpan) (quotes: seq<Quote>) =
     // handle no quotes scenario
     if Seq.isEmpty quotes then
         Ok Seq.empty
@@ -195,6 +195,27 @@ let aggregate (timeSpan: TimeSpan) (quotes: seq<Quote>) =
               Close = Seq.last (snd x) |> fun t -> t.Close
               Volume = Seq.sumBy (fun (t: Quote) -> t.Volume) (snd x) })
 
+        |> Ok
+
+let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: seq<Quote>) =
+    if timeFrame <> TimeFrame.Month then
+        // parameter conversion
+        let newTimeSpan = toTimeSpan timeFrame
+
+        // convert
+        aggregateByTimeSpan newTimeSpan quotes
+
+    else // month
+        quotes
+        |> Seq.sortBy (fun x -> x.Date)
+        |> Seq.groupBy (fun x -> DateTime(x.Date.Year, x.Date.Month, 1))
+        |> Seq.map (fun x ->
+            { Quote.Date = fst x
+              Open = Seq.head (snd x) |> fun t -> t.Open
+              High = Seq.maxBy (fun (t: Quote) -> t.High) (snd x) |> fun t -> t.High
+              Low = Seq.minBy (fun (t: Quote) -> t.Low) (snd x) |> fun t -> t.Low
+              Close = Seq.last (snd x) |> fun t -> t.Close
+              Volume = Seq.sumBy (fun (t: Quote) -> t.Volume) (snd x) })
         |> Ok
 
 let private _quotesList: cset<Quote> = cset []
