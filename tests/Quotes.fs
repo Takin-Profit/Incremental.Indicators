@@ -77,7 +77,7 @@ let testList2 =
                     (DateTime(2022, 1, 2), 15.0)
                     (DateTime(2022, 1, 3), 20.0) ]
 
-              let actualList = toSortedList CandlePart.Open unsortedList
+              let actualList = toSortedList unsortedList
               Expect.sequenceEqual actualList expectedList "lists should be equal and sorted"
           }
 

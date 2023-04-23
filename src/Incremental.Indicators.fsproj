@@ -13,6 +13,7 @@
         <Compile Include="Types.fs" />
         <Compile Include="Calc.fs" />
         <Compile Include="Quotes.fs" />
+        <Compile Include="RSI.fs" />
         <Compile Include="SMA.fs" />
     </ItemGroup>
     <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
