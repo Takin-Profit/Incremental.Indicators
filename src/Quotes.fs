@@ -190,7 +190,7 @@ let aggregateByTimeSpan (timeSpan: TimeSpan) (quotes: Quote cset) =
         |> AMap.toASet
         |> Ok
 
-let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: seq<Quote>) =
+let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: Quote cset) =
     if timeFrame <> TimeFrame.Month then
         // parameter conversion
         let newTimeSpan = toTimeSpan timeFrame
@@ -200,15 +200,16 @@ let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: seq<Quote>) =
 
     else // month
         quotes
-        |> Seq.sortBy (fun x -> x.Date)
-        |> Seq.groupBy (fun x -> DateTime(x.Date.Year, x.Date.Month, 1))
-        |> Seq.map (fun x ->
-            { Quote.Date = fst x
-              Open = Seq.head (snd x) |> fun t -> t.Open
-              High = Seq.maxBy (fun (t: Quote) -> t.High) (snd x) |> fun t -> t.High
-              Low = Seq.minBy (fun (t: Quote) -> t.Low) (snd x) |> fun t -> t.Low
-              Close = Seq.last (snd x) |> fun t -> t.Close
-              Volume = Seq.sumBy (fun (t: Quote) -> t.Volume) (snd x) })
+        |> ASet.sortBy (fun x -> x.Date)
+        |> AList.groupBy (fun x -> DateTime(x.Date.Year, x.Date.Month, 1))
+        |> AMap.map (fun x v ->
+            { Quote.Date = x
+              Open = IndexList.first v |> fun t -> t.Open
+              High = Seq.maxBy (fun (t: Quote) -> t.High) v |> fun t -> t.High
+              Low = Seq.minBy (fun (t: Quote) -> t.Low) v |> fun t -> t.Low
+              Close = Seq.last v |> fun t -> t.Close
+              Volume = Seq.sumBy (fun (t: Quote) -> t.Volume) v })
+        |> AMap.toASet
         |> Ok
 
 let private _quotesList: cset<Quote> = cset []
