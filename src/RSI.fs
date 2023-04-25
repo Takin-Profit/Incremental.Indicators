@@ -2,7 +2,8 @@ module Incremental.Indicators.RSI
 
 open Incremental.Indicators.Quotes
 open FSharp.Data.Adaptive
-
+open System
+open Incremental.Indicators.Types
 
 let private rsi (n: int) =
     let mutable averageGain: double = 0.0
@@ -13,7 +14,7 @@ let private rsi (n: int) =
     let mutable rs: double = 0.0
     let mutable rsiValue: double = 0.0
 
-    fun (price: double) ->
+    fun (d: DateTime) (price: double) ->
         if prevClose = 0.0 then
             prevClose <- price
             rsiValue <- 0.0
@@ -36,11 +37,11 @@ let private rsi (n: int) =
                 rs <- averageGain / averageLoss
                 rsiValue <- 100.0 - 100.0 / (1.0 + rs)
 
-        rsiValue
+        {| Date = d; Value = rsiValue |}
 
 type private RSI =
     private
-        { results: aset<double> }
+        { results: {| Date: DateTime; Value: double |} aset }
 
     member private x.Results = x.results
 
@@ -53,10 +54,12 @@ type private RSI =
             Ok { results = b }
 
 
-let create a (b: cset<Quote>) =
-    if a < 1 then
-        Error("LookBack periods must be greater than 0 for RSI.")
-    else
-        let rsi = rsi a
-        let quotes = quotesToTuple
-        Ok RSI.Create a
+let create a (quotes: Quote cset) =
+    let rsi = rsi a
+    let quotes = toTuples CandlePart.Close quotes
+    let results = quotes |> ASet.map (fun q -> rsi (fst q) (snd q))
+    let calc = RSI.Create a results
+
+    match calc with
+    | Error a -> Error a
+    | Ok c -> Ok(fun () -> c.calculate)
