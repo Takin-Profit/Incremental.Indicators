@@ -111,11 +111,11 @@ let condense<'TResult when 'TResult :> IReusableResult> (results: cset<'TResult>
 
     filteredResultsList |> ASet.sortBy (fun x -> x.Date) |> AList.toASet
 
-let toTupleChainable (reusable: seq<IReusableResult>) : seq<DateTime * double> =
+let toTupleChainable (reusable: cset<IReusableResult>) =
     reusable
-    |> Seq.filter (fun x -> not (checkNull x.Value))
-    |> Seq.map (fun x -> x.Date, nullToNaN x.Value)
+    |> ASet.filter (fun x -> not (checkNull x.Value))
+    |> ASet.map (fun x -> x.Date, nullToNaN x.Value)
 
 
-let toTupleNaN (reusable: seq<IReusableResult>) : seq<DateTime * double> =
-    reusable |> Seq.map (fun x -> x.Date, nullToNaN x.Value)
+let toTupleNaN (reusable: IReusableResult cset) =
+    reusable |> ASet.map (fun x -> x.Date, nullToNaN x.Value)
