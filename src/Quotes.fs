@@ -211,11 +211,3 @@ let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: Quote cset) =
               Volume = Seq.sumBy (fun (t: Quote) -> t.Volume) v })
         |> AMap.toASet
         |> Ok
-
-let private _quotesList: cset<Quote> = cset []
-
-let all = _quotesList
-
-let add quotes =
-    for quote in quotes do
-        transact (fun () -> _quotesList.Add(quote)) |> ignore

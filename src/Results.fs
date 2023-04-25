@@ -1,6 +1,8 @@
 module Incremental.Indicators.Results
 
+open FSharp.Data.Adaptive
 open System
+open Incremental.Indicators.Quotes
 open Incremental.Indicators.Series
 
 type IReusableResult =
@@ -23,14 +25,41 @@ type SyncType =
     | RemoveOnly
     | FullMatch
 
-let syncIndex syncMe toMatch syncType =
+let private get value =
+    let mutable t = None
+    value |> AVal.map (fun v -> t <- v) |> ignore
+    t
 
-    let mutable syncMeList = syncMe |> Seq.sortBy (fun x -> x.Date) |> List.ofSeq
-    let toMatchList = toMatch |> Seq.sortBy (fun x -> x.Date) |> List.ofSeq
+let getType value =
+    let mutable t = Type.GetType("None")
+    value |> AVal.map (fun v -> t <- v) |> ignore
+    t
 
-    if syncMeList.IsEmpty || toMatchList.IsEmpty then
+
+let mapper (m: ResultBase) (syncMeList: Quote alist) syncType type_ =
+    let prepend, append, remove =
+        match syncType with
+        | SyncType.Prepend -> true, false, false
+        | SyncType.AppendOnly -> true, true, false
+        | SyncType.RemoveOnly -> false, false, true
+        | SyncType.FullMatch -> true, true, true
+
+    let r = syncMeList |> AList.filter (fun x -> x.Date = m.Date) |> AList.tryFirst
+
+    match get r with
+    | None when prepend ->
+        let n = unbox (Activator.CreateInstance(type_, m.Date))
+        Some n
+    | _ when not append -> None
+    | _ -> None
+(* TODO: Come back to this function later.
+let syncIndex (syncMe: Quote cset) (toMatch: ResultBase cset) syncType =
+    if syncMe.IsEmpty || toMatch.IsEmpty then
         []
     else
+        let syncMeList = syncMe |> ASet.sortBy (fun x -> x.Date)
+        let toMatchList = toMatch |> ASet.sortBy (fun x -> x.Date)
+
         let prepend, append, remove =
             match syncType with
             | SyncType.Prepend -> true, false, false
@@ -38,23 +67,16 @@ let syncIndex syncMe toMatch syncType =
             | SyncType.RemoveOnly -> false, false, true
             | SyncType.FullMatch -> true, true, true
 
-        let type_ = syncMeList[0].GetType()
+        let type_ = AList.tryFirst syncMeList |> get |> (fun t -> t.Value.GetType())
 
         // add plugs for missing values
         if prepend || append then
             let toAppend =
-                [ for m in toMatchList do
-                      let r = syncMeList |> List.tryFind (fun x -> x.Date = m.Date)
-
-                      match r with
-                      | None when prepend ->
-                          let n = unbox (Activator.CreateInstance(type_, m.Date))
-                          Some n
-                      | _ when not append -> None
-                      | _ -> None ]
+                toMatchList
+                |> AList.map (fun m -> mapper m syncMeList syncType type_)
                 |> List.choose id
 
-            syncMeList <- List.append syncMeList toAppend
+            AList.append syncMeList toAppend
 
         // remove unmatched results
         if remove then
@@ -70,6 +92,7 @@ let syncIndex syncMe toMatch syncType =
             syncMeList <- List.fold (fun acc x -> if toRemove |> List.contains x then acc else x :: acc) [] syncMeList
 
         syncMeList |> List.sortBy (fun x -> x.Date)
+*)
 
 let inline checkNull v =
     match box v with
@@ -82,13 +105,11 @@ let nullToNaN (value: double option) =
     | Some x -> x
     | None -> Double.NaN
 
-let condense<'TResult when 'TResult :> IReusableResult> (results: seq<'TResult>) =
-    let resultsList = results |> List.ofSeq
+let condense<'TResult when 'TResult :> IReusableResult> (results: cset<'TResult>) =
 
-    let filteredResultsList =
-        resultsList |> List.filter (fun x -> not (checkNull x.Value))
+    let filteredResultsList = results |> ASet.filter (fun x -> not (checkNull x.Value))
 
-    filteredResultsList |> List.sortBy (fun x -> x.Date) |> Seq.ofList
+    filteredResultsList |> ASet.sortBy (fun x -> x.Date) |> AList.toASet
 
 let toTupleChainable (reusable: seq<IReusableResult>) : seq<DateTime * double> =
     reusable
