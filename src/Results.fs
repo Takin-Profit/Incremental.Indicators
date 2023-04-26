@@ -1,24 +1,8 @@
 module Incremental.Indicators.Results
 
-open System.Collections.Generic
 open FSharp.Data.Adaptive
 open System
-open FSharp.Data.Adaptive.ComputationExpressions
-open Incremental.Indicators.Quotes
-open Incremental.Indicators.Series
 
-type IReusableResult =
-    interface
-        inherit ISeries
-        abstract member Value: double option with get
-    end
-
-[<Serializable>]
-type ResultBase =
-    { Date: DateTime }
-
-    interface ISeries with
-        member this.Date = this.Date
 
 [<RequireQualifiedAccess>]
 type SyncType =
@@ -39,8 +23,11 @@ let private get value =
     value |> AVal.map (fun v -> t <- v) |> ignore
     t
 
-let syncIndex<'TResultA, 'TResultB
-    when 'TResultA :> ISeries and 'TResultB :> ISeries and 'TResultA: equality and 'TResultB: equality>
+let inline syncIndex<'TResultA, 'TResultB
+    when 'TResultA: (member Date: DateTime)
+    and 'TResultB: (member Date: DateTime)
+    and 'TResultA: equality
+    and 'TResultB: equality>
     (syncMe: 'TResultA cset)
     (toMatch: 'TResultB cset)
     syncType
@@ -94,28 +81,11 @@ let syncIndex<'TResultA, 'TResultB
     else
         ASet.empty
 
-let inline checkNull v =
-    match box v with
-    | null -> true
-    | :? double as d when Double.IsNaN(d) -> true
-    | _ -> false
 
-let nullToNaN (value: double option) =
-    match value with
-    | Some x -> x
-    | None -> Double.NaN
-
-let condense<'TResult when 'TResult :> IReusableResult> (results: cset<'TResult>) =
-
-    let filteredResultsList = results |> ASet.filter (fun x -> not (checkNull x.Value))
-
-    filteredResultsList |> ASet.sortBy (fun x -> x.Date) |> AList.toASet
-
-let toTupleChainable (reusable: cset<IReusableResult>) =
+let inline toTuples<'TResult when 'TResult: (member Date: DateTime) and 'TResult: (member Value: double)>
+    (reusable: 'TResult cset)
+    =
     reusable
-    |> ASet.filter (fun x -> not (checkNull x.Value))
-    |> ASet.map (fun x -> x.Date, nullToNaN x.Value)
-
-
-let toTupleNaN (reusable: IReusableResult cset) =
-    reusable |> ASet.map (fun x -> x.Date, nullToNaN x.Value)
+    |> ASet.map (fun x -> (x.Date, x.Value))
+    |> ASet.sortBy fst
+    |> AList.toASet

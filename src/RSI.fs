@@ -1,9 +1,10 @@
 module Incremental.Indicators.RSI
 
-open Incremental.Indicators.Quotes
+open Quotes
+open Types
+
 open FSharp.Data.Adaptive
 open System
-open Incremental.Indicators.Types
 
 let private rsi (n: int) =
     let mutable averageGain: double = 0.0
@@ -39,6 +40,7 @@ let private rsi (n: int) =
 
         {| Date = d; Value = rsiValue |}
 
+
 type private RSI =
     private
         { results: {| Date: DateTime; Value: double |} aset }
@@ -56,7 +58,7 @@ type private RSI =
 
 let create a (quotes: Quote cset) =
     let rsi = rsi a
-    let quotes = toTuples CandlePart.Close quotes
+    let quotes = Quotes.toTuples CandlePart.Close quotes
     let results = quotes |> ASet.map (fun q -> rsi (fst q) (snd q))
     let calc = RSI.Create a results
 
