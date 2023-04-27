@@ -1,9 +1,12 @@
 module Incremental.Indicators.RSI
 
 open Quotes
+open Results
 
 open FSharp.Data.Adaptive
 open System
+
+type RsiResult = { Value: double; Date: DateTime }
 
 let private rsi (n: int) =
     let mutable averageGain: double = 0.0
@@ -37,29 +40,39 @@ let private rsi (n: int) =
                 rs <- averageGain / averageLoss
                 rsiValue <- 100.0 - 100.0 / (1.0 + rs)
 
-        {| Date = d; Value = rsiValue |}
+        { Date = d; Value = rsiValue }
 
 
 type private RSI =
     private
-        { results: {| Date: DateTime; Value: double |} aset }
+        { results: RsiResult aset }
 
-    member private x.Results = x.results
+    member x.Results = x.results
 
-    member x.calculate = AVal.force x.Results.Content
+    member x.reCalculate = AVal.force x.Results.Content
 
-    static member Create a b =
-        if a < 1 then
-            Error("LookBack periods must be greater than 0 for RSI.")
-        else
-            Ok { results = b }
+    static member Create a b = { results = b }
 
 
 let create a (quotes: Quote cset) =
-    let rsi = rsi a
-    let results = quotes |> ASet.map (fun q -> rsi q.Date (double q.Close))
-    let calc = RSI.Create a results
+    if a < 1 then
+        Error("LookBack periods must be greater than 0 for RSI.")
+    else
+        let rsi = rsi a
+        let results = quotes |> ASet.map (fun q -> rsi q.Date (double q.Close))
+        let t = RSI.Create a results
+        Ok(fun () -> t.Results, (fun () -> t.reCalculate))
 
-    match calc with
-    | Error a -> Error a
-    | Ok c -> Ok(fun () -> c.calculate)
+let inline from<'TResult when 'TResult: (member Date: DateTime) and 'TResult: (member Value: double)>
+    a
+    (results: 'TResult cset)
+    (rsiResults: RsiResult aset)
+    =
+    if a < 1 then
+        Error("LookBack periods must be greater than 0 for RSI.")
+    else
+        let rsi = rsi a
+        let rsiOfResults = results |> ASet.map (fun q -> rsi q.Date q.Value)
+        let synced = syncIndex rsiOfResults rsiResults SyncType.Prepend
+        let t = RSI.Create a synced
+        Ok(fun () -> t.Results, (fun () -> t.reCalculate))

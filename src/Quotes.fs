@@ -1,15 +1,10 @@
 module Incremental.Indicators.Quotes
 
-open Incremental.Indicators.Series
-open Incremental.Indicators.Types
-open Incremental.Indicators.Calc
 open System
 open FSharp.Data.Adaptive
-
-let fromCsv path = failwith "todo"
-let fromJSON json = failwith "todo"
-
-
+open Series
+open Types
+open Calc
 
 type Quote =
     { Date: DateTime

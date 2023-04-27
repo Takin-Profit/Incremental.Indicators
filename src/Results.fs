@@ -23,13 +23,9 @@ let private get value =
     value |> AVal.map (fun v -> t <- v) |> ignore
     t
 
-let inline syncIndex<'TResultA, 'TResultB
-    when 'TResultA: (member Date: DateTime)
-    and 'TResultB: (member Date: DateTime)
-    and 'TResultA: equality
-    and 'TResultB: equality>
-    (syncMe: 'TResultA cset)
-    (toMatch: 'TResultB cset)
+let inline syncIndex<'TResultA, 'TResultB when 'TResultA: (member Date: DateTime) and 'TResultA: equality>
+    (syncMe: 'TResultA aset)
+    (toMatch: 'TResultA aset)
     syncType
     =
     let syncMeList = syncMe |> ASet.sortBy (fun x -> x.Date)
@@ -39,7 +35,14 @@ let inline syncIndex<'TResultA, 'TResultB
 
     let type_ = AList.tryFirst syncMeList |> get |> (fun t -> t.Value.GetType())
 
-    if syncMe.IsEmpty || toMatch.IsEmpty then
+    let isEmpty =
+        adaptive {
+            let! l = ASet.isEmpty syncMe
+            let! r = ASet.isEmpty toMatch
+            return l || r
+        }
+
+    if AVal.force isEmpty then
         ASet.empty
     // add plugs for missing values
     elif prepend || append then
