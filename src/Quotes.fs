@@ -19,8 +19,6 @@ type Quote =
       Close: decimal
       Volume: decimal }
 
-    interface ISeries with
-        member this.Date = this.Date
 
 
 type internal QuoteD =

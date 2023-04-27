@@ -2,10 +2,8 @@ module Incremental.Indicators.Series
 
 open System
 open System.Collections.ObjectModel
+open FSharp.Data.Adaptive
 
-[<Interface>]
-type ISeries =
-    abstract Date: DateTime
 
 // Generic Transforms
 let toCollection<'T> (source: seq<'T>) =
@@ -19,28 +17,32 @@ let toCollection<'T> (source: seq<'T>) =
 
         Ok(collection)
 
-let toSortedCollection<'TSeries when 'TSeries :> ISeries> (series: seq<'TSeries>) =
+let inline toSortedCollection<'TSeries when 'TSeries: (member Date: DateTime)> (series: seq<'TSeries>) =
     series |> Seq.sortBy (fun s -> s.Date) |> toCollection
 
-let toSortedList<'TSeries when 'TSeries :> ISeries> (series: seq<'TSeries>) =
+let inline toSortedList<'TSeries when 'TSeries: (member Date: DateTime)> (series: seq<'TSeries>) =
     series |> Seq.sortBy (fun s -> s.Date) |> Seq.toList
 
 // SEEK & FIND in SERIES// SEEK & FIND in SERIES
-let find<'TSeries when 'TSeries :> ISeries> (series: seq<'TSeries>) (lookupDate: DateTime) : 'TSeries option =
+let inline find<'TSeries when 'TSeries: (member Date: DateTime)>
+    (series: seq<'TSeries>)
+    (lookupDate: DateTime)
+    : 'TSeries option =
     series |> Seq.tryFind (fun x -> x.Date = lookupDate)
 
 
 // REMOVE AND PRUNING of SERIES
 // REMOVE SPECIFIC PERIODS
-let removeWarmupPeriods<'T> (series: seq<'T>) (removePeriods: int) =
+let removeWarmupPeriods<'T> (series: 'T cset) (removePeriods: int) =
     if removePeriods < 0 then
         Error("the Remove Periods value must be greater than or equal to 0.")
 
     else
-        Ok(series |> Seq.skip removePeriods |> Seq.toList)
+        Ok(series |> ASet.toAList |> AList.skip removePeriods |> AList.toASet)
 
+// TODO: make this adaptive
 // REMOVE PERIODS
-let remove<'T> (series: seq<'T>) (removePeriods: int) =
+let remove<'T> (series: 'T cset) (removePeriods: int) =
     let seriesList = series |> Seq.toList
 
     if seriesList.Length <= removePeriods then

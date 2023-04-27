@@ -1,7 +1,6 @@
 module Incremental.Indicators.RSI
 
 open Quotes
-open Types
 
 open FSharp.Data.Adaptive
 open System
@@ -58,8 +57,7 @@ type private RSI =
 
 let create a (quotes: Quote cset) =
     let rsi = rsi a
-    let quotes = Quotes.toTuples CandlePart.Close quotes
-    let results = quotes |> ASet.map (fun q -> rsi (fst q) (snd q))
+    let results = quotes |> ASet.map (fun q -> rsi q.Date (double q.Close))
     let calc = RSI.Create a results
 
     match calc with
