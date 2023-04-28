@@ -14,6 +14,15 @@ type Quote =
       Close: decimal
       Volume: decimal }
 
+    static member Empty =
+        { Date = DateTime.MaxValue
+          Open = 0m
+          Close = 0m
+          High = 0m
+          Low = 0m
+          Volume = 0m }
+
+    static member IsEmpty q = q.Date = DateTime.MaxValue
 
 
 type internal QuoteD =
@@ -23,6 +32,16 @@ type internal QuoteD =
       Low: double
       Close: double
       Volume: double }
+
+    static member Empty =
+        { Date = DateTime.MaxValue
+          Open = 0.0
+          Close = 0.0
+          High = 0.0
+          Low = 0.0
+          Volume = 0.0 }
+
+    static member IsEmpty q = q.Date = DateTime.MaxValue
 
 type IBasicData =
     abstract Date: DateTime

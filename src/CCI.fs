@@ -4,6 +4,7 @@ open System
 open FSharp.Data.Adaptive
 open Quotes
 open Calc
+open Util
 
 type CciResult = { Value: float; Date: DateTime }
 
@@ -25,7 +26,11 @@ let calcCCI quotes (lookBack: int) =
         for i in 0..len do
             // check for enough data to calculate based on lookBack length
             if i + 1 >= lookBack then
-                // offset is the number of items to skip in the list
+                // offset to grab the current typicalPrice or Quote
+                let current = i + 1
+                // get the current typical price
+                let currentTP = getVal
+                // position to start grabbing items from in the typicalPrices list
                 let offset = i + 1 - lookBack
                 // grab a chunk of data from the typicalPrices list to calculate the SMA with
                 let period = AList.sub offset lookBack typicalPrices
