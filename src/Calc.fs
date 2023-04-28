@@ -1,7 +1,7 @@
 module Incremental.Indicators.Calc
 
 open System
-
+open FSharp.Data.Adaptive
 // check for nulls, empty arrays, and existing of NaN or Infinity
 let dataIsValid (list: double[]) =
     match list with
@@ -15,7 +15,13 @@ let mean (values: double[]) =
     | Ok _ -> Array.sum values / double values.Length
     | Error _ -> Double.NaN
 
-
+// adaptive mean deviation function
+let meanDev (values: double alist) =
+    aval {
+        let! mean = AList.average values
+        let deviation = AList.map (fun x -> abs (x - mean)) values
+        return! AList.average deviation
+    }
 // Standard Deviation
 let stdDev (values: double[]) =
     match dataIsValid values with

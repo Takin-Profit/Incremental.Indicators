@@ -5,6 +5,9 @@ open System.Collections.ObjectModel
 open FSharp.Data.Adaptive
 
 
+let slice (startIndex: int) (endIndex: int) (xs: 'a alist) =
+    xs |> AList.take (endIndex - startIndex + 1) |> AList.skip startIndex
+
 // Generic Transforms
 let toCollection<'T> (source: seq<'T>) =
     if isNull source then

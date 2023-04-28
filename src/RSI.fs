@@ -51,7 +51,7 @@ type private RSI =
 
     member x.reCalculate = AVal.force x.Results.Content
 
-    static member Create a b = { results = b }
+    static member Create b = { results = b }
 
 
 let create a (quotes: Quote cset) =
@@ -60,7 +60,7 @@ let create a (quotes: Quote cset) =
     else
         let rsi = rsi a
         let results = quotes |> ASet.map (fun q -> rsi q.Date (double q.Close))
-        let t = RSI.Create a results
+        let t = RSI.Create results
         Ok(fun () -> t.Results, (fun () -> t.reCalculate))
 
 let inline from<'TResult when 'TResult: (member Date: DateTime) and 'TResult: (member Value: double)>
@@ -74,5 +74,5 @@ let inline from<'TResult when 'TResult: (member Date: DateTime) and 'TResult: (m
         let rsi = rsi a
         let rsiOfResults = results |> ASet.map (fun q -> rsi q.Date q.Value)
         let synced = syncIndex rsiOfResults rsiResults SyncType.Prepend
-        let t = RSI.Create a synced
+        let t = RSI.Create synced
         Ok(fun () -> t.Results, (fun () -> t.reCalculate))

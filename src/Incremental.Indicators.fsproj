@@ -8,12 +8,14 @@
     <ItemGroup>
         <Compile Include="Library.fs" />
         <Compile Include="Series.fs" />
+        <Compile Include="Util.fs" />
         <Compile Include="Types.fs" />
         <Compile Include="Calc.fs" />
         <Compile Include="Quotes.fs" />
         <Compile Include="Results.fs" />
         <Compile Include="Candles.fs" />
         <Compile Include="RSI.fs" />
+        <Compile Include="CCI.fs" />
         <Compile Include="SMA.fs" />
     </ItemGroup>
     <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
