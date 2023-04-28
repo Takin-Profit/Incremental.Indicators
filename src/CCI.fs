@@ -29,7 +29,9 @@ let calcCCI quotes (lookBack: int) =
                 // offset to grab the current typicalPrice or Quote
                 let current = i + 1
                 // get the current typical price
-                let currentTP = getVal
+                let! currentTP = getVal current typicalPrices 0.0
+                // gets the current Quote
+                let! currentQuote = getVal current newQuotes QuoteD.Empty
                 // position to start grabbing items from in the typicalPrices list
                 let offset = i + 1 - lookBack
                 // grab a chunk of data from the typicalPrices list to calculate the SMA with
@@ -43,23 +45,16 @@ let calcCCI quotes (lookBack: int) =
                 let cciValue =
                     if deviationSMA <> 0.0 then
                         let factor = double 0.015
-                        let numerator = (typicalPrices[i] - typicalPriceSMA)
+                        let numerator = (currentTP - typicalPriceSMA)
                         let denominator = (factor * deviationSMA)
                         (numerator / denominator)
                     else
                         Double.NaN
 
-                // create CciResult record
-                let! result =
-                    match cciValue with
-                    | Some value ->
-                        { Value = value
-                          Date = newQuotes[i].Date }
-                        |> Some
-                    | None -> None
-
                 // return CciResult record as incremental value
-                yield result
+                yield
+                    { Value = cciValue
+                      Date = currentQuote.Date }
 
     }
 
