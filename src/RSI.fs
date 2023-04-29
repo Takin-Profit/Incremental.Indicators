@@ -1,67 +1,104 @@
 module Incremental.Indicators.RSI
 
-open Quotes
-
 open FSharp.Data.Adaptive
 open System
 
+type Quote =
+    { Date: DateTime
+      Open: decimal
+      High: decimal
+      Low: decimal
+      Close: decimal
+      Volume: decimal }
+
+    static member Empty =
+        { Date = DateTime.MaxValue
+          Open = 0m
+          Close = 0m
+          High = 0m
+          Low = 0m
+          Volume = 0m }
+
+    static member IsEmpty q = q.Date = DateTime.MaxValue
+
+
+type internal QuoteD =
+    { Date: DateTime
+      Open: double
+      High: double
+      Low: double
+      Close: double
+      Volume: double }
+
+    static member Empty =
+        { Date = DateTime.MaxValue
+          Open = 0.0
+          Close = 0.0
+          High = 0.0
+          Low = 0.0
+          Volume = 0.0 }
+
+    static member IsEmpty q = q.Date = DateTime.MaxValue
+
+// convert to quotes in double precision
+// QuoteD alist sorted by date
+let internal toQuoteDList (quotes: Quote alist) =
+    quotes
+    |> AList.map (fun x ->
+        { Date = x.Date
+          Open = double x.Open
+          High = double x.High
+          Low = double x.Low
+          Close = double x.Close
+          Volume = double x.Volume })
+    |> AList.sortBy (fun x -> x.Date)
+
+let internal getVal offset defaultVal list =
+    aval {
+        let! item = AList.sub offset 1 list |> AList.tryFirst
+        return Option.defaultValue defaultVal item
+    }
+
 type RsiResult = { Value: double; Date: DateTime }
 
-let internal calcRsi (quotes: Quote alist) (period: int) =
-    let quoteList = toQuoteDList quotes
-    let length = List.length quoteList
-    let mutable avgGain = 0.0
-    let mutable avgLoss = 0.0
-    let mutable rs = 0.0
-    let mutable prevQuote = quoteList[0]
-    let mutable rsiResults = []
+let calculateRSI (quotes: Quote alist) (period: int) =
+    let newQuotes = toQuoteDList quotes
 
-    // Calculate initial gains and losses for the first period
-    let mutable gain = 0.0
-    let mutable loss = 0.0
+    alist {
+        let! len = AList.count newQuotes
+        let mutable gain: double = 0.0
+        let mutable loss: double = 0.0
+        let mutable rs: double = 0.0
+        let mutable rsi: double = 0.0
 
-    for i in 1..period do
-        let curQuote = quoteList[i]
-        let diff = curQuote.Close - prevQuote.Close
+        for i in 1..period do
+            let! currentQuote = getVal i QuoteD.Empty newQuotes
+            let! previousQuote = getVal i QuoteD.Empty newQuotes
+            let diff = currentQuote.Close - previousQuote.Close
 
-        if diff > 0.0 then
-            gain <- gain + diff
-        else
-            loss <- loss + (abs diff)
+            if diff > 0.0 then
+                gain <- gain + diff
+            else
+                loss <- loss + abs (diff)
 
-        prevQuote <- curQuote
+        rs <- gain / loss
+        rsi <- 100.0 - (100.0 / (1.0 + rs))
 
-    avgGain <- gain / float period
-    avgLoss <- loss / float period
+        for i in (period + 1) .. len - 1 do
+            let! currentQuote = getVal i QuoteD.Empty newQuotes
+            let! previousQuote = getVal i QuoteD.Empty newQuotes
+            let diff = currentQuote.Close - previousQuote.Close
 
-    if avgLoss = 0.0 then
-        rs <- 100.0
-    else
-        rs <- 100.0 - (100.0 / (1.0 + (avgGain / avgLoss)))
+            if diff > 0.0 then
+                gain <- gain + diff - (gain / double period)
+                loss <- loss - (loss / double period)
+            else
+                loss <- loss + abs (diff) - (loss / double period)
+                gain <- gain - (gain / double period)
 
-    // Add initial RSI result
-    let initialResult = { Value = rs; Date = prevQuote.Date }
-    rsiResults <- [ initialResult ]
+            rs <- gain / loss
+            rsi <- 100.0 - (100.0 / (1.0 + rs))
 
-    // Calculate RSI for remaining quotes
-    for i in period .. (length - 1) do
-        let curQuote = quoteList[i]
-        let diff = curQuote.Close - prevQuote.Close
+        rsi
 
-        if diff > 0.0 then
-            avgGain <- ((avgGain * float (period - 1)) + diff) / float period
-            avgLoss <- (avgLoss * float (period - 1)) / float period
-        else
-            avgGain <- (avgGain * float (period - 1)) / float period
-            avgLoss <- ((avgLoss * float (period - 1)) + (abs diff)) / float period
-
-        if avgLoss = 0.0 then
-            rs <- 100.0
-        else
-            rs <- 100.0 - (100.0 / (1.0 + (avgGain / avgLoss)))
-
-        let result = { Value = rs; Date = curQuote.Date }
-        rsiResults <- rsiResults @ [ result ]
-        prevQuote <- curQuote
-
-    rsiResults |> List.toArray
+    }

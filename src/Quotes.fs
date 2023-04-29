@@ -5,6 +5,7 @@ open FSharp.Data.Adaptive
 open Types
 open Calc
 
+
 type Quote =
     { Date: DateTime
       Open: decimal
@@ -42,11 +43,33 @@ type internal QuoteD =
 
     static member IsEmpty q = q.Date = DateTime.MaxValue
 
+// check if a quote with the sam date already exists
+let private quoteIsValid (quote: Quote) (quotes: Quote alist) =
+    let found =
+        quotes
+        |> AList.filter (fun q -> q.Date = quote.Date)
+        |> AList.count
+        |> AVal.force
 
+    found = 0
+
+type QuoteList =
+    private
+        { quotes: Quote clist
+          doubleQuotes: QuoteD alist }
+
+    member x.Quotes = x.quotes |> AList.sortBy (fun x -> x.Date)
+
+    member x.Add(quote: Quote) =
+        if quoteIsValid quote x.Quotes then
+            transact (fun () -> x.quotes.Add quote) |> ignore
+            Ok("Quote added successfully")
+        else
+            Error($"Quote with date '{quote.Date}' already exists")
 
 
 //validate there are no quotes with duplicate dates
-let validate (quotes: Quote seq) =
+let private validate (quotes: Quote seq) =
     // we cannot rely on date consistency when looking back, so we force sort
     let sortedQuotes = quotes |> Seq.sortBy (fun x -> x.Date)
 
