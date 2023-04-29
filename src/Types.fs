@@ -1,7 +1,6 @@
 module Incremental.Indicators.Types
 
 open System
-open Quotes
 
 [<RequireQualifiedAccess>]
 type CandlePart =

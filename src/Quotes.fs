@@ -43,6 +43,7 @@ type internal QuoteD =
 
     static member IsEmpty q = q.Date = DateTime.MaxValue
 
+
 module internal Quotes =
     // check if a quote with the sam date already exists
     let isValid (quote: Quote) (quotes: Quote alist) =
@@ -178,24 +179,29 @@ module internal Quotes =
             |> ASet.toAList
             |> Ok
 
+
 type Quotes =
     private
         { quotes: Quote clist
           doubleQuotes: QuoteD alist }
 
-    member x.Quotes = x.quotes |> AList.sortBy (fun x -> x.Date)
+    member internal x.Quotes = x.quotes |> AList.sortBy (fun x -> x.Date)
 
-    // convert quotes to double precision quotes
+    // convert quotes to double precision quotes (QuoteD)
     member internal x.DoublePrecis = x.doubleQuotes |> AList.sortBy (fun x -> x.Date)
 
-    member x.Add(quote: Quote) =
+    // convert quotes to (DateTime * double) alist
+    // candlePart determines the part of price to be used
+    member internal x.toTuples candlePart = Quotes.listToTuples candlePart x.quotes
+
+    member x.add(quote: Quote) =
         if Quotes.isValid quote x.Quotes then
             transact (fun () -> x.quotes.Add quote) |> ignore
             Ok("Quote added successfully")
         else
             Error($"Quote with date '{quote.Date}' already exists")
 
-    static member Create quotes =
+    static member create quotes =
         match Quotes.createList quotes with
         | Error a -> Error a
         | Ok q ->

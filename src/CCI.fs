@@ -1,4 +1,4 @@
-module Incremental.Indicators.CCI
+module internal Incremental.Indicators.CCI
 
 open System
 open FSharp.Data.Adaptive
@@ -9,7 +9,7 @@ open Util
 type CciResult = { Value: float; Date: DateTime }
 
 // cci calculation function
-let internal calcCCI quotes (lookBack: int) =
+let calcCCI quotes (lookBack: int) =
     // convert Quotes to QuoteD
     let newQuotes = toQuoteDList quotes
     // create typical Prices list
