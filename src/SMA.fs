@@ -2,23 +2,28 @@ module Incremental.Indicators.SMA
 
 open System
 open FSharp.Data.Adaptive
+open Incremental.Indicators.Types
+open Quotes
 
-type SMAResult = { Date: DateTime; Sma: double }
+type SMAResult = { Date: DateTime; Value: double }
 
-let calcSMA (period: int) =
-    let mutable sum: double = 0.0
+let internal calcSMA (lookBack: int) (quotes: Quote alist) =
+    let newQuotes = toQuoteDList quotes
     let mutable count = 0
-    let mutable buffer = []
 
-    fun (price: double) ->
-        sum <- sum + price
-        count <- count + 1
-        buffer <- buffer @ [ price ]
+    alist {
+        for quote in newQuotes do
+            count <- count + 1
 
-        if count > period then
-            let head = List.head buffer
-            sum <- sum - head
-            buffer <- List.tail buffer
-            count <- count - 1
+            if count >= lookBack then
+                let offset = count - lookBack
 
-        sum / double (min count period)
+                let period =
+                    AList.sub offset lookBack newQuotes
+                    |> quoteDListToToTuples CandlePart.Close
+                    |> AList.map snd
+
+                let! res = AList.average period
+
+                { Date = quote.Date; Value = res }
+    }
