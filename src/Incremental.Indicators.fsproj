@@ -11,6 +11,7 @@
         <Compile Include="Types.fs" />
         <Compile Include="Calc.fs" />
         <Compile Include="Quotes.fs" />
+        <Compile Include="Candle.fs" />
         <Compile Include="Results.fs" />
         <Compile Include="RSI.fs" />
         <Compile Include="CCI.fs" />
