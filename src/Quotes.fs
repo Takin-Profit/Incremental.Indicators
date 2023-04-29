@@ -2,6 +2,7 @@ namespace Incremental.Indicators
 
 open System
 open FSharp.Data.Adaptive
+open Incremental.Indicators.Types
 open Types
 open Calc
 
@@ -111,7 +112,7 @@ module internal Quotes =
         |> AList.sortBy (fun x -> x.Date)
 
 
-    let quoteDtoTuple (q: QuoteD) (candlePart: CandlePart) =
+    let quoteDtoTuple (candlePart: CandlePart) (q: QuoteD) =
         match candlePart with
         | CandlePart.Open -> (q.Date, q.Open)
         | CandlePart.High -> (q.Date, q.High)
@@ -126,9 +127,7 @@ module internal Quotes =
 
     // convert quoteD list to tuples
     let quoteDListToToTuples (candlePart: CandlePart) (qdList: QuoteD alist) =
-        qdList
-        |> AList.sortBy (fun x -> x.Date)
-        |> AList.map (fun x -> quoteDtoTuple x candlePart)
+        qdList |> AList.sortBy (fun x -> x.Date) |> AList.map (quoteDtoTuple candlePart)
 
     // aggregation (quantization) using TimeSpan>
     let aggregateByTimeSpan (timeSpan: TimeSpan) (quotes: Quote alist) =
@@ -183,17 +182,64 @@ module internal Quotes =
 type Quotes =
     private
         { quotes: Quote clist
-          doubleQuotes: QuoteD alist }
+          doubleQuotes: QuoteD alist
+          sortedQuotes: Quote alist }
 
-    member internal x.Quotes = x.quotes |> AList.sortBy (fun x -> x.Date)
+    member internal x.Quotes = x.quotes
 
-    // convert quotes to double precision quotes (QuoteD)
-    member internal x.DoublePrecis = x.doubleQuotes |> AList.sortBy (fun x -> x.Date)
+    /// convert quotes to double precision quotes (QuoteD)
+    member internal x.DoublePrecis = x.doubleQuotes
 
     // convert quotes to (DateTime * double) alist
     // candlePart determines the part of price to be used
-    member internal x.toTuples candlePart = Quotes.listToTuples candlePart x.quotes
+    member private x.toTuples candlePart = Quotes.listToTuples candlePart x.quotes
 
+    member private x.prices candlePart =
+        Quotes.quoteDListToToTuples candlePart x.doubleQuotes |> AList.map snd
+
+    /// convert quotes to (DateTime * double) alist with open prices
+    member x.OpenTuples = x.toTuples CandlePart.Open
+    /// convert quotes to double alist with open prices
+    member x.OpenPrices = x.prices CandlePart.Open
+    /// convert quotes to (DateTime * double) alist with close prices
+    member x.CloseTuples = x.toTuples CandlePart.Close
+    /// convert quotes to double alist with close prices
+    member x.ClosePrices = x.prices CandlePart.Close
+    /// convert quotes to (DateTime * double) alist with high prices
+    member x.HighTuples = x.toTuples CandlePart.High
+    /// convert quotes to double alist with high prices
+    member x.HighPrices = x.prices CandlePart.High
+    /// convert quotes to (DateTime * double) alist with low prices
+    member x.LowTuples = x.toTuples CandlePart.Low
+    /// convert quotes to double alist with open prices
+    member x.LowPrices = x.prices CandlePart.Low
+    /// convert quotes to (DateTime * double) alist with volume
+    member x.VolumeTuples = x.toTuples CandlePart.Volume
+    /// convert quotes to double alist with volume
+    member x.Volume = x.prices CandlePart.Volume
+    /// convert quotes to (DateTime * double) alist with HL2 prices
+    member x.Hl2Tuples = x.toTuples CandlePart.HL2
+    /// convert quotes to double alist with HL2 prices
+    member x.HL2Prices = x.prices CandlePart.HL2
+    /// convert quotes to (DateTime * double) alist with HLC3 prices
+    member x.HLC3Tuples = x.toTuples CandlePart.HLC3
+    /// convert quotes to double alist with HLC3 prices
+    member x.HLC3Prices = x.prices CandlePart.HLC3
+    /// convert quotes to (DateTime * double) alist with OC2 prices
+    member x.OC2Tuples = x.toTuples CandlePart.OC2
+    /// convert quotes to double alist with OC2 prices
+    member x.OC2Prices = x.prices CandlePart.OC2
+    /// convert quotes to (DateTime * double) alist with OHL3 prices
+    member x.OHL3Tuples = x.toTuples CandlePart.OHL3
+    /// convert quotes to double alist with OHL3 prices
+    member x.OHL3Prices = x.prices CandlePart.OHL3
+    /// convert quotes to (DateTime * double) alist with OHLC4 prices
+    member x.OHLC4Tuples = x.toTuples CandlePart.OHLC4
+    /// convert quotes to double alist with OHLC4 prices
+    member x.OHLC4Prices = x.prices CandlePart.OHLC4
+
+    /// add a single quote to the list, will return an Error if a quote
+    /// with the same Date is already in the list
     member x.add(quote: Quote) =
         if Quotes.isValid quote x.Quotes then
             transact (fun () -> x.quotes.Add quote) |> ignore
@@ -207,4 +253,5 @@ type Quotes =
         | Ok q ->
             Ok
                 { quotes = q
-                  doubleQuotes = Quotes.toQuoteDList q }
+                  doubleQuotes = Quotes.toQuoteDList q |> AList.sortBy (fun x -> x.Date)
+                  sortedQuotes = q |> AList.sortBy (fun x -> x.Date) }
