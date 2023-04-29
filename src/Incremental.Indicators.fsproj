@@ -8,9 +8,9 @@
     <ItemGroup>
         <Compile Include="Library.fs" />
         <Compile Include="Util.fs" />
-        <Compile Include="Quotes.fs" />
         <Compile Include="Types.fs" />
         <Compile Include="Calc.fs" />
+        <Compile Include="Quotes.fs" />
         <Compile Include="Results.fs" />
         <Compile Include="RSI.fs" />
         <Compile Include="CCI.fs" />

@@ -7,8 +7,8 @@ open System
 
 type RsiResult = { Value: double; Date: DateTime }
 
-let internal calculateRsi (quotes: QuoteD seq) (period: int) =
-    let quoteList = List.ofSeq quotes
+let internal calcRsi (quotes: Quote alist) (period: int) =
+    let quoteList = toQuoteDList quotes
     let length = List.length quoteList
     let mutable avgGain = 0.0
     let mutable avgLoss = 0.0

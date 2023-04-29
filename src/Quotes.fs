@@ -85,14 +85,14 @@ let quoteToTuple (candlePart: CandlePart) (q: Quote) =
     | CandlePart.OHL3 -> (q.Date, double (q.Open + q.High + q.Low) / 3.0)
     | CandlePart.OHLC4 -> (q.Date, double (q.Open + q.High + q.Low + q.Close) / 4.0)
 
-// convert Quote clist to (DateTime * double) clist
+// convert Quote alist to (DateTime * double) alist
 // candlePart determines the part of price to be used
-let toTuples (candlePart: CandlePart) (quotes: Quote clist) =
+let toTuples (candlePart: CandlePart) (quotes: Quote alist) =
     quotes |> AList.map (quoteToTuple candlePart) |> AList.sortBy fst
 
 // convert to quotes in double precision
 // QuoteD alist sorted by date
-let internal toQuoteDList (quotes: Quote clist) =
+let internal toQuoteDList (quotes: Quote alist) =
     quotes
     |> AList.map (fun x ->
         { Date = x.Date
@@ -118,16 +118,17 @@ let internal quoteDtoTuple (q: QuoteD) (candlePart: CandlePart) =
     | CandlePart.OHLC4 -> (q.Date, (q.Open + q.High + q.Low + q.Close) / 4.0)
 
 // convert quoteD list to tuples
-let internal quoteDListToToTuples (candlePart: CandlePart) (qdList: QuoteD clist) =
+let internal quoteDListToToTuples (candlePart: CandlePart) (qdList: QuoteD alist) =
     qdList
     |> AList.sortBy (fun x -> x.Date)
     |> AList.map (fun x -> quoteDtoTuple x candlePart)
 
 // aggregation (quantization) using TimeSpan>
 ///
-let aggregateByTimeSpan (timeSpan: TimeSpan) (quotes: Quote clist) =
+let aggregateByTimeSpan (timeSpan: TimeSpan) (quotes: Quote alist) =
+    let count = AList.count quotes |> AVal.force
     // handle no quotes scenario
-    if quotes.IsEmpty then
+    if count < 1 then
         Ok AList.empty
     else if timeSpan <= TimeSpan.Zero then
         Error
@@ -149,7 +150,7 @@ let aggregateByTimeSpan (timeSpan: TimeSpan) (quotes: Quote clist) =
         |> ASet.toAList
         |> Ok
 
-let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: Quote clist) =
+let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: Quote alist) =
     if timeFrame <> TimeFrame.Month then
         // parameter conversion
         let newTimeSpan = toTimeSpan timeFrame
@@ -171,3 +172,67 @@ let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: Quote clist) =
         |> AMap.toASetValues
         |> ASet.toAList
         |> Ok
+
+
+[<Serializable>]
+type CandleProps =
+    { High: decimal
+      Low: decimal
+      Open: decimal
+      Close: decimal
+      // raw sizes
+      Size: decimal
+      Body: decimal
+      UpperWick: decimal
+      LowerWick: decimal
+      // percent sizes
+      BodyPct: double
+      UpperWickPct: double
+      LowerWickPct: double
+      // directional info
+      IsBullish: bool
+      IsBearish: bool }
+
+let makeCandleProps (quote: Quote) =
+    let high = quote.High
+    let low = quote.Low
+    let openPrice = quote.Open
+    let close = quote.Close
+    let size = high - low
+
+    let body =
+        if openPrice > close then
+            openPrice - close
+        else
+            close - openPrice
+
+    let upperWick = high - if openPrice > close then openPrice else close
+    let lowerWick = if openPrice > close then close else openPrice - low
+
+    { High = high
+      Low = low
+      Open = openPrice
+      Close = close
+      Size = size
+      Body = body
+      UpperWick = upperWick
+      LowerWick = lowerWick
+      BodyPct = if size <> 0m then double (body / size) else 1
+      UpperWickPct = if size <> 0m then double (upperWick / size) else 1
+      LowerWickPct = if size <> 0m then double (lowerWick / size) else 1
+      IsBullish = close > openPrice
+      IsBearish = close < openPrice }
+
+[<Serializable>]
+type CandleResult =
+    { Date: DateTime
+      Price: decimal
+      Match: Match
+      Candle: CandleProps }
+
+// TODO: fix this constructor function to create price correctly as well as match Prop.
+let makeCandleResult (quote: Quote) =
+    { Date = quote.Date
+      Price = quote.Close
+      Match = Match.Neutral
+      Candle = makeCandleProps quote }
