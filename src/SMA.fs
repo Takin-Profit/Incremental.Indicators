@@ -5,7 +5,7 @@ open FSharp.Data.Adaptive
 
 type SMAResult = { Date: DateTime; Sma: double }
 
-let calculateSMA (period: int) =
+let calcSMA (period: int) =
     let mutable sum: double = 0.0
     let mutable count = 0
     let mutable buffer = []

@@ -43,25 +43,11 @@ type internal QuoteD =
 
     static member IsEmpty q = q.Date = DateTime.MaxValue
 
-type IBasicData =
-    abstract Date: DateTime
-    abstract Value: double
-
-type BasicData =
-    { Date: DateTime
-      Value: double }
-
-    interface IBasicData with
-        member this.Date = this.Date
-        member this.Value = this.Value
-//    TODO uncomment this once Result module is complete
-//    interface IReusableResult with
-//        member this.Value = box this.Value }
 
 
 
 //validate there are no quotes with duplicate dates
-let validate (quotes: seq<Quote>) : Result<seq<Quote>, string> =
+let validate (quotes: Quote alist) : Result<Quote alist, string> =
     // we cannot rely on date consistency when looking back, so we force sort
     let sortedQuotes = toSortedList quotes
 
@@ -104,30 +90,27 @@ let quoteToTuple (q: Quote) (candlePart: CandlePart) =
 let toTuples (candlePart: CandlePart) (quotes: Quote cset) =
     quotes |> ASet.map (fun x -> quoteToTuple x candlePart)
 
-// convert seq<Quote> to (DateTime * double) cset sorted by date
-let toSortedSet (candlePart: CandlePart) (quotes: Quote cset) =
+// convert Quote clist to (DateTime * double) clist sorted by date
+// candlePart determines the part of price to be used
+let toSortedSet (candlePart: CandlePart) (quotes: Quote clist) =
     quotes
-    |> ASet.sortBy (fun x -> x.Date)
+    |> AList.sortBy (fun x -> x.Date)
     |> AList.map (fun x -> quoteToTuple x candlePart)
-    |> AList.toASet
-
-// convert cset<DateTime * double> clist(DateTime * double)  sorted by date
-let toSortedList (tuples: (DateTime * double) cset) = tuples |> ASet.sortBy fst
-
 
 // DOUBLE QUOTES
 // convert to quotes in double precision
-let internal toQuoteDSet (quotes: Quote cset) =
+// QuoteD alist sorted by date
+let internal toQuoteDList (quotes: Quote clist) =
     quotes
-    |> ASet.map (fun x ->
+    |> AList.map (fun x ->
         { Date = x.Date
-          Open = float x.Open
-          High = float x.High
-          Low = float x.Low
-          Close = float x.Close
-          Volume = float x.Volume })
-    |> ASet.sortBy (fun x -> x.Date)
-    |> AList.toASet
+          Open = double x.Open
+          High = double x.High
+          Low = double x.Low
+          Close = double x.Close
+          Volume = double x.Volume })
+    |> AList.sortBy (fun x -> x.Date)
+
 
 let internal quoteDtoTuple (q: QuoteD) (candlePart: CandlePart) =
     match candlePart with
@@ -141,55 +124,27 @@ let internal quoteDtoTuple (q: QuoteD) (candlePart: CandlePart) =
     | CandlePart.OC2 -> (q.Date, (q.Open + q.Close) / 2.0)
     | CandlePart.OHL3 -> (q.Date, (q.Open + q.High + q.Low) / 3.0)
     | CandlePart.OHLC4 -> (q.Date, (q.Open + q.High + q.Low + q.Close) / 4.0)
+
 // convert quoteD list to tuples
-let internal quoteDSetToToTuples (candlePart: CandlePart) (qdList: QuoteD cset) =
+let internal quoteDSetToToTuples (candlePart: CandlePart) (qdList: QuoteD clist) =
     qdList
-    |> ASet.sortBy (fun x -> x.Date)
+    |> AList.sortBy (fun x -> x.Date)
     |> AList.map (fun x -> quoteDtoTuple x candlePart)
     |> AList.toASet
 
-/// Convert TQuote element to basic data record
-let toBasicData (candlePart: CandlePart) (q: Quote) =
-    match candlePart with
-    | CandlePart.Open -> { Date = q.Date; Value = double q.Open }
-    | CandlePart.High -> { Date = q.Date; Value = double q.High }
-    | CandlePart.Low -> { Date = q.Date; Value = double q.Low }
-    | CandlePart.Close ->
-        { Date = q.Date
-          Value = double q.Close }
-    | CandlePart.Volume ->
-        { Date = q.Date
-          Value = double q.Volume }
-    | CandlePart.HL2 ->
-        { Date = q.Date
-          Value = (double (q.High + q.Low) / 2.0) }
-    | CandlePart.HLC3 ->
-        { Date = q.Date
-          Value = (double (q.High + q.Low + q.Close) / 3.0) }
-    | CandlePart.OC2 ->
-        { Date = q.Date
-          Value = (double (q.Open + q.Close) / 2.0) }
-    | CandlePart.OHL3 ->
-        { Date = q.Date
-          Value = (double (q.Open + q.High + q.Low) / 3.0) }
-    | CandlePart.OHLC4 ->
-        { Date = q.Date
-          Value = (double (q.Open + q.High + q.Low + q.Close) / 4.0) }
-
-
 // aggregation (quantization) using TimeSpan>
 ///
-let aggregateByTimeSpan (timeSpan: TimeSpan) (quotes: Quote cset) =
+let aggregateByTimeSpan (timeSpan: TimeSpan) (quotes: Quote clist) =
     // handle no quotes scenario
     if quotes.IsEmpty then
-        Ok ASet.empty
+        Ok AList.empty
     else if timeSpan <= TimeSpan.Zero then
         Error
             $"Quotes Aggregation must use a usable new size value (see documentation for options). Value: %A{timeSpan}"
     else
         // return aggregation
         quotes
-        |> ASet.sortBy (fun x -> x.Date)
+        |> AList.sortBy (fun x -> x.Date)
         |> AList.groupBy (fun x -> roundDown x.Date timeSpan)
         |> AMap.map (fun x v ->
             { Quote.Date = x
@@ -199,10 +154,11 @@ let aggregateByTimeSpan (timeSpan: TimeSpan) (quotes: Quote cset) =
               Close = Seq.last v |> fun t -> t.Close
               Volume = Seq.sumBy (fun (t: Quote) -> t.Volume) v })
 
-        |> AMap.toASet
+        |> AMap.toASetValues
+        |> ASet.toAList
         |> Ok
 
-let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: Quote cset) =
+let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: Quote clist) =
     if timeFrame <> TimeFrame.Month then
         // parameter conversion
         let newTimeSpan = toTimeSpan timeFrame
@@ -212,7 +168,7 @@ let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: Quote cset) =
 
     else // month
         quotes
-        |> ASet.sortBy (fun x -> x.Date)
+        |> AList.sortBy (fun x -> x.Date)
         |> AList.groupBy (fun x -> DateTime(x.Date.Year, x.Date.Month, 1))
         |> AMap.map (fun x v ->
             { Quote.Date = x
@@ -221,5 +177,6 @@ let aggregateByTimeFrame (timeFrame: TimeFrame) (quotes: Quote cset) =
               Low = Seq.minBy (fun (t: Quote) -> t.Low) v |> fun t -> t.Low
               Close = Seq.last v |> fun t -> t.Close
               Volume = Seq.sumBy (fun (t: Quote) -> t.Volume) v })
-        |> AMap.toASet
+        |> AMap.toASetValues
+        |> ASet.toAList
         |> Ok

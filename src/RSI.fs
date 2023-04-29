@@ -8,71 +8,61 @@ open System
 
 type RsiResult = { Value: double; Date: DateTime }
 
-let private rsi (n: int) =
-    let mutable averageGain: double = 0.0
-    let mutable averageLoss: double = 0.0
-    let mutable prevClose: double = 0.0
-    let mutable prevGain: double = 0.0
-    let mutable prevLoss: double = 0.0
-    let mutable rs: double = 0.0
-    let mutable rsiValue: double = 0.0
+let internal calculateRsi (quotes: QuoteD seq) (period: int) =
+    let quoteList = List.ofSeq quotes
+    let length = List.length quoteList
+    let mutable avgGain = 0.0
+    let mutable avgLoss = 0.0
+    let mutable rs = 0.0
+    let mutable prevQuote = quoteList.[0]
+    let mutable rsiResults = []
 
-    fun (d: DateTime) (price: double) ->
-        if prevClose = 0.0 then
-            prevClose <- price
-            rsiValue <- 0.0
+    // Calculate initial gains and losses for the first period
+    let mutable gain = 0.0
+    let mutable loss = 0.0
+
+    for i in 1..period do
+        let curQuote = quoteList.[i]
+        let diff = curQuote.Close - prevQuote.Close
+
+        if diff > 0.0 then
+            gain <- gain + diff
         else
-            let change = price - prevClose
-            prevClose <- price
-            let gain = if change > 0.0 then change else 0.0
-            let loss = if change < 0.0 then abs change else 0.0
+            loss <- loss + (abs diff)
 
-            if prevGain = 0.0 then
-                prevGain <- gain
-                prevLoss <- loss
-                averageGain <- gain
-                averageLoss <- loss
-            else
-                averageGain <- (prevGain * (double n - 1.0) + gain) / double n
-                averageLoss <- (prevLoss * (double n - 1.0) + loss) / double n
-                prevGain <- averageGain
-                prevLoss <- averageLoss
-                rs <- averageGain / averageLoss
-                rsiValue <- 100.0 - 100.0 / (1.0 + rs)
+        prevQuote <- curQuote
 
-        { Date = d; Value = rsiValue }
+    avgGain <- gain / float period
+    avgLoss <- loss / float period
 
-
-type private RSI =
-    private
-        { results: RsiResult aset }
-
-    member x.Results = x.results
-
-    member x.reCalculate = AVal.force x.Results.Content
-
-    static member Create b = { results = b }
-
-
-let create a (quotes: Quote cset) =
-    if a < 1 then
-        Error("LookBack periods must be greater than 0 for RSI.")
+    if avgLoss = 0.0 then
+        rs <- 100.0
     else
-        let rsi = rsi a
-        let results = quotes |> ASet.map (fun q -> rsi q.Date (double q.Close))
-        let t = RSI.Create results
-        Ok(fun () -> t.Results, (fun () -> t.reCalculate))
+        rs <- 100.0 - (100.0 / (1.0 + (avgGain / avgLoss)))
 
-let inline from<'TResult when 'TResult: (member Date: DateTime) and 'TResult: (member Value: double)>
-    a
-    (results: 'TResult cset)
-    (rsiResults: RsiResult aset)
-    =
-    if a < 1 then
-        Error("LookBack periods must be greater than 0 for RSI.")
-    else
-        let rsi = rsi a
-        let rsiOfResults = results |> ASet.map (fun q -> rsi q.Date q.Value)
-        let synced = syncIndex rsiOfResults rsiResults SyncType.Prepend
-        let t = RSI.Create synced
-        Ok(fun () -> t.Results, (fun () -> t.reCalculate))
+    // Add initial RSI result
+    let initialResult = { Value = rs; Date = prevQuote.Date }
+    rsiResults <- [ initialResult ]
+
+    // Calculate RSI for remaining quotes
+    for i in period .. (length - 1) do
+        let curQuote = quoteList.[i]
+        let diff = curQuote.Close - prevQuote.Close
+
+        if diff > 0.0 then
+            avgGain <- ((avgGain * float (period - 1)) + diff) / float period
+            avgLoss <- ((avgLoss * float (period - 1))) / float period
+        else
+            avgGain <- ((avgGain * float (period - 1))) / float period
+            avgLoss <- ((avgLoss * float (period - 1)) + (abs diff)) / float period
+
+        if avgLoss = 0.0 then
+            rs <- 100.0
+        else
+            rs <- 100.0 - (100.0 / (1.0 + (avgGain / avgLoss)))
+
+        let result = { Value = rs; Date = curQuote.Date }
+        rsiResults <- rsiResults @ [ result ]
+        prevQuote <- curQuote
+
+    rsiResults |> List.toArray

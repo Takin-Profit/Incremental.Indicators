@@ -9,13 +9,11 @@ open Util
 type CciResult = { Value: float; Date: DateTime }
 
 
-let private convert quotes =
-    toQuoteDSet quotes |> ASet.toAList |> AList.sortBy (fun q -> q.Date)
 
 // cci calculation function
 let calcCCI quotes (lookBack: int) =
     // convert Quotes to QuoteD
-    let newQuotes = convert quotes
+    let newQuotes = toQuoteDList quotes
     // create typical Prices list
     let typicalPrices =
         newQuotes |> AList.map (fun q -> (q.High + q.Low + q.Close) / 3.0)
@@ -29,9 +27,9 @@ let calcCCI quotes (lookBack: int) =
                 // offset to grab the current typicalPrice or Quote
                 let current = i + 1
                 // get the current typical price
-                let! currentTP = getVal current typicalPrices 0.0
+                let! currentTP = getVal current 0.0 typicalPrices
                 // gets the current Quote
-                let! currentQuote = getVal current newQuotes QuoteD.Empty
+                let! currentQuote = getVal current QuoteD.Empty newQuotes
                 // position to start grabbing items from in the typicalPrices list
                 let offset = i + 1 - lookBack
                 // grab a chunk of data from the typicalPrices list to calculate the SMA with
