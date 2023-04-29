@@ -2,7 +2,6 @@ module Incremental.Indicators.Quotes
 
 open System
 open FSharp.Data.Adaptive
-open Series
 open Types
 open Calc
 
@@ -47,9 +46,9 @@ type internal QuoteD =
 
 
 //validate there are no quotes with duplicate dates
-let validate (quotes: Quote alist) : Result<Quote alist, string> =
+let validate (quotes: Quote seq) =
     // we cannot rely on date consistency when looking back, so we force sort
-    let sortedQuotes = toSortedList quotes
+    let sortedQuotes = quotes |> Seq.sortBy (fun x -> x.Date)
 
     // Check for duplicates
     let mutable lastDate = DateTime.MinValue
@@ -65,7 +64,7 @@ let validate (quotes: Quote alist) : Result<Quote alist, string> =
     | Some duplicateQuote -> Error $"Duplicate date found on %A{duplicateQuote.Date}."
     | None -> Ok(sortedQuotes)
 
-let createQuotes (quotes: seq<Quote>) = validate quotes |> Result.map cset
+let createQuotes (quotes: seq<Quote>) = validate quotes |> Result.map clist
 
 
 
@@ -73,7 +72,7 @@ let nativeCulture = System.Threading.Thread.CurrentThread.CurrentUICulture
 
 // STANDARD DECIMAL QUOTES
 // convert TQuote element to basic tuple
-let quoteToTuple (q: Quote) (candlePart: CandlePart) =
+let quoteToTuple (candlePart: CandlePart) (q: Quote) =
     match candlePart with
     | CandlePart.Open -> (q.Date, double q.Open)
     | CandlePart.High -> (q.Date, double q.High)
@@ -87,15 +86,15 @@ let quoteToTuple (q: Quote) (candlePart: CandlePart) =
     | CandlePart.OHLC4 -> (q.Date, double (q.Open + q.High + q.Low + q.Close) / 4.0)
 
 // convert cset<Quote> to cset<DateTime * double>
-let toTuples (candlePart: CandlePart) (quotes: Quote cset) =
-    quotes |> ASet.map (fun x -> quoteToTuple x candlePart)
+let toTuples (candlePart: CandlePart) (quotes: Quote clist) =
+    quotes |> AList.map (fun x -> quoteToTuple candlePart x) |> AList.sortBy fst
 
 // convert Quote clist to (DateTime * double) clist sorted by date
 // candlePart determines the part of price to be used
-let toSortedSet (candlePart: CandlePart) (quotes: Quote clist) =
+let sortByDate (candlePart: CandlePart) (quotes: Quote clist) =
     quotes
     |> AList.sortBy (fun x -> x.Date)
-    |> AList.map (fun x -> quoteToTuple x candlePart)
+    |> AList.map (fun x -> quoteToTuple candlePart x)
 
 // DOUBLE QUOTES
 // convert to quotes in double precision
@@ -126,11 +125,10 @@ let internal quoteDtoTuple (q: QuoteD) (candlePart: CandlePart) =
     | CandlePart.OHLC4 -> (q.Date, (q.Open + q.High + q.Low + q.Close) / 4.0)
 
 // convert quoteD list to tuples
-let internal quoteDSetToToTuples (candlePart: CandlePart) (qdList: QuoteD clist) =
+let internal quoteDListToToTuples (candlePart: CandlePart) (qdList: QuoteD clist) =
     qdList
     |> AList.sortBy (fun x -> x.Date)
     |> AList.map (fun x -> quoteDtoTuple x candlePart)
-    |> AList.toASet
 
 // aggregation (quantization) using TimeSpan>
 ///

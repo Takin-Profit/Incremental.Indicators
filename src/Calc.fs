@@ -13,7 +13,7 @@ let meanDev (values: double alist) =
     }
 
 // adaptive Standard Deviation
-let stdDev (values: double clist) =
+let stdDev (values: double alist) =
     aval {
         let! n = AList.count values
         let! avg = AList.average values
@@ -87,7 +87,7 @@ module OptionalMath =
 
     let roundDouble (value: double) (digits: int) : double = Math.Round(value, digits)
 
-    let roundDecimal (value: decimal) (digits: int) : decimal = System.Math.Round(value, digits)
+    let roundDecimal (value: decimal) (digits: int) : decimal = Math.Round(value, digits)
 
     let noneToNaN (value: double option) : double =
         match value with
