@@ -64,14 +64,14 @@ let validate (quotes: Quote seq) =
     | Some duplicateQuote -> Error $"Duplicate date found on %A{duplicateQuote.Date}."
     | None -> Ok(sortedQuotes)
 
+// convert a sequence of quotes to a clist
 let createQuotes (quotes: seq<Quote>) = validate quotes |> Result.map clist
 
 
 
 let nativeCulture = System.Threading.Thread.CurrentThread.CurrentUICulture
 
-// STANDARD DECIMAL QUOTES
-// convert TQuote element to basic tuple
+// convert TQuote element to basic tuple of double precision values
 let quoteToTuple (candlePart: CandlePart) (q: Quote) =
     match candlePart with
     | CandlePart.Open -> (q.Date, double q.Open)
@@ -85,18 +85,11 @@ let quoteToTuple (candlePart: CandlePart) (q: Quote) =
     | CandlePart.OHL3 -> (q.Date, double (q.Open + q.High + q.Low) / 3.0)
     | CandlePart.OHLC4 -> (q.Date, double (q.Open + q.High + q.Low + q.Close) / 4.0)
 
-// convert cset<Quote> to cset<DateTime * double>
-let toTuples (candlePart: CandlePart) (quotes: Quote clist) =
-    quotes |> AList.map (fun x -> quoteToTuple candlePart x) |> AList.sortBy fst
-
-// convert Quote clist to (DateTime * double) clist sorted by date
+// convert Quote clist to (DateTime * double) clist
 // candlePart determines the part of price to be used
-let sortByDate (candlePart: CandlePart) (quotes: Quote clist) =
-    quotes
-    |> AList.sortBy (fun x -> x.Date)
-    |> AList.map (fun x -> quoteToTuple candlePart x)
+let toTuples (candlePart: CandlePart) (quotes: Quote clist) =
+    quotes |> AList.map (quoteToTuple candlePart) |> AList.sortBy fst
 
-// DOUBLE QUOTES
 // convert to quotes in double precision
 // QuoteD alist sorted by date
 let internal toQuoteDList (quotes: Quote clist) =

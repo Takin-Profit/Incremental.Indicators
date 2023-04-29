@@ -8,10 +8,8 @@ open Util
 
 type CciResult = { Value: float; Date: DateTime }
 
-
-
 // cci calculation function
-let calcCCI quotes (lookBack: int) =
+let internal calcCCI quotes (lookBack: int) =
     // convert Quotes to QuoteD
     let newQuotes = toQuoteDList quotes
     // create typical Prices list
@@ -36,32 +34,20 @@ let calcCCI quotes (lookBack: int) =
                 let period = AList.sub offset lookBack typicalPrices
                 // sma of typical prices over given lookBack period
                 let! typicalPriceSMA = AList.average period
-                // mean deviation of the typical prices from the SMA
+                // mean deviation
                 let! deviationSMA = meanDev period
 
                 // cci value calculation
                 let cciValue =
                     if deviationSMA <> 0.0 then
-                        let factor = double 0.015
                         let numerator = (currentTP - typicalPriceSMA)
-                        let denominator = (factor * deviationSMA)
+                        let denominator = (double 0.015 * deviationSMA)
                         (numerator / denominator)
                     else
                         Double.NaN
 
-                // return CciResult record as incremental value
                 yield
                     { Value = cciValue
                       Date = currentQuote.Date }
 
     }
-
-
-
-// let create a (quotes: Quote cset) =
-//     if a < 1 then
-//         Error("LookBack periods must be greater than 0 for Commodity Channel Index.")
-//     else
-//         let newQuotes = convert quotes
-//         let typicalPrices = getTypicalPrices newQuotes
-//         let sma = typicalPrices

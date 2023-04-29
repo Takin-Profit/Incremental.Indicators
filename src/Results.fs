@@ -3,7 +3,6 @@ module Incremental.Indicators.Results
 open FSharp.Data.Adaptive
 open System
 
-
 [<RequireQualifiedAccess>]
 type SyncType =
     | Prepend
@@ -24,21 +23,21 @@ let private get value =
     t
 
 let inline syncIndex<'TResultA, 'TResultB when 'TResultA: (member Date: DateTime) and 'TResultA: equality>
-    (syncMe: 'TResultA aset)
-    (toMatch: 'TResultA aset)
+    (syncMe: 'TResultA alist)
+    (toMatch: 'TResultA alist)
     syncType
     =
-    let syncMeList = syncMe |> ASet.sortBy (fun x -> x.Date)
-    let toMatchList = toMatch |> ASet.sortBy (fun x -> x.Date)
+    let syncMeList = syncMe |> AList.sortBy (fun x -> x.Date)
+    let toMatchList = toMatch |> AList.sortBy (fun x -> x.Date)
 
     let prepend, append, remove = getSyncType syncType
-
+    // TODO: this code is fairly brittle and should be removed or replaced at some point
     let type_ = AList.tryFirst syncMeList |> get |> (fun t -> t.Value.GetType())
 
     let isEmpty =
         adaptive {
-            let! l = ASet.isEmpty syncMe
-            let! r = ASet.isEmpty toMatch
+            let! l = AList.isEmpty syncMe
+            let! r = AList.isEmpty toMatch
             return l || r
         }
 
@@ -84,11 +83,8 @@ let inline syncIndex<'TResultA, 'TResultB when 'TResultA: (member Date: DateTime
     else
         ASet.empty
 
-
+// convert any Result type in to (DateTime * double) alist
 let inline toTuples<'TResult when 'TResult: (member Date: DateTime) and 'TResult: (member Value: double)>
-    (reusable: 'TResult cset)
+    (reusable: 'TResult clist)
     =
-    reusable
-    |> ASet.map (fun x -> (x.Date, x.Value))
-    |> ASet.sortBy fst
-    |> AList.toASet
+    reusable |> AList.map (fun x -> (x.Date, x.Value)) |> AList.sortBy fst
