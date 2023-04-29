@@ -73,7 +73,7 @@ let calculateRSI (quotes: Quote alist) (period: int) =
 
         for i in 1..period do
             let! currentQuote = getVal i QuoteD.Empty newQuotes
-            let! previousQuote = getVal i QuoteD.Empty newQuotes
+            let! previousQuote = getVal (i - 1) QuoteD.Empty newQuotes
             let diff = currentQuote.Close - previousQuote.Close
 
             if diff > 0.0 then
@@ -86,7 +86,7 @@ let calculateRSI (quotes: Quote alist) (period: int) =
 
         for i in (period + 1) .. len - 1 do
             let! currentQuote = getVal i QuoteD.Empty newQuotes
-            let! previousQuote = getVal i QuoteD.Empty newQuotes
+            let! previousQuote = getVal (i - 1) QuoteD.Empty newQuotes
             let diff = currentQuote.Close - previousQuote.Close
 
             if diff > 0.0 then
