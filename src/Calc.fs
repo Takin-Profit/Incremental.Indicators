@@ -2,18 +2,7 @@ module Incremental.Indicators.Calc
 
 open System
 open FSharp.Data.Adaptive
-// check for nulls, empty arrays, and existing of NaN or Infinity
-let dataIsValid (list: double[]) =
-    match list with
-    | [||] -> Error("Values cannot be empty")
-    | null -> Error("Values cannot be null")
-    | _ -> Ok(list)
 
-// calculate the mean
-let mean (values: double[]) =
-    match dataIsValid values with
-    | Ok _ -> Array.sum values / double values.Length
-    | Error _ -> Double.NaN
 
 // adaptive mean deviation function
 let meanDev (values: double alist) =
@@ -22,29 +11,43 @@ let meanDev (values: double alist) =
         let deviation = AList.map (fun x -> abs (x - mean)) values
         return! AList.average deviation
     }
-// Standard Deviation
-let stdDev (values: double[]) =
-    match dataIsValid values with
-    | Error(A) -> Error(A)
-    | Ok _ ->
-        let n = double values.Length
-        let avg = mean values
-        let squaredDiffs = Array.map (fun v -> (v - avg) ** 2.0) values
-        Ok(sqrt (Array.sum squaredDiffs / n))
 
+// adaptive Standard Deviation
+let stdDev (values: double clist) =
+    aval {
+        let! n = AList.count values
+        let! avg = AList.average values
+        let squaredDiffs = AList.map (fun v -> (v - avg) ** 2.0) values
+        return! AList.average squaredDiffs
+    }
+
+// this function does not do any error handling or input validation
+// do not use outside of this module
+let private zip (x: 'X alist) (y: 'Y alist) =
+    alist {
+        for i in x do
+            for j in y do
+                yield (i, j)
+    }
 // SLOPE of BEST FIT LINE
-let slope (x: double[]) (y: double[]) =
+let slope (x: double alist) (y: double alist) =
     // validate params
-    match dataIsValid x, dataIsValid y with
-    | Error(A), _ -> Error(A)
-    | _, Error(A) -> Error(A)
-    | Ok(x), Ok(y) when x.Length <> y.Length -> Error("Slope x and y must be the same size")
-    | _ ->
-        let meanX = mean x
-        let meanY = mean y
-        let numerator = Array.map2 (fun x y -> (x - meanX) * (y - meanY)) x y |> Array.sum
-        let denominator = Array.map (fun x -> (x - meanX) ** 2.0) x |> Array.sum
-        Ok(numerator / denominator)
+    aval {
+        let! xLen = AList.count x
+        let! yLen = AList.count y
+
+        if xLen <> yLen then
+            return Error("Slope x and y must be the same size")
+        else
+            let! avgX = AList.average x
+            let! avgY = AList.average y
+            let zipped = zip x y
+            let! numerator = AList.map (fun x -> (fst x - avgX) * (snd x - avgY)) zipped |> AList.sum
+            let! denominator = AList.map (fun x -> (x - avgX) ** 2.0) x |> AList.sum
+            return Ok(numerator / denominator)
+
+    }
+
 
 // DATE ROUNDING
 let roundDown (date: DateTime) (interval: TimeSpan) =
