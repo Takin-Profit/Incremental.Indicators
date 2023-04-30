@@ -10,27 +10,28 @@ type SyncType =
     | RemoveOnly
     | FullMatch
 
-let private getSyncType syncType =
-    match syncType with
-    | SyncType.Prepend -> true, false, false
-    | SyncType.AppendOnly -> true, true, false
-    | SyncType.RemoveOnly -> false, false, true
-    | SyncType.FullMatch -> true, true, true
 
-let private get value =
-    let mutable t = None
-    value |> AVal.map (fun v -> t <- v) |> ignore
-    t
 
 let inline syncIndex<'TResultA, 'TResultB when 'TResultA: (member Date: DateTime) and 'TResultA: equality>
     (syncMe: 'TResultA alist)
     (toMatch: 'TResultA alist)
     syncType
     =
+    let get value =
+        let mutable t = None
+        value |> AVal.map (fun v -> t <- v) |> ignore
+        t
+
     let syncMeList = syncMe |> AList.sortBy (fun x -> x.Date)
     let toMatchList = toMatch |> AList.sortBy (fun x -> x.Date)
 
-    let prepend, append, remove = getSyncType syncType
+    let prepend, append, remove =
+        match syncType with
+        | SyncType.Prepend -> true, false, false
+        | SyncType.AppendOnly -> true, true, false
+        | SyncType.RemoveOnly -> false, false, true
+        | SyncType.FullMatch -> true, true, true
+
     // TODO: this code is fairly brittle and should be removed or replaced at some point
     let type_ = AList.tryFirst syncMeList |> get |> (fun t -> t.Value.GetType())
 
