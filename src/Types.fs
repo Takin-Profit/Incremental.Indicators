@@ -83,6 +83,7 @@ type TimeFrame =
     | ThreeMin
     | OneMin
 
+/// <summary>Converts a TimeFrame type into a System.TimeFrame Object</summary>
 let toTimeSpan timeFrame =
     match timeFrame with
     // Month TimeSpan will conversion is incorrect but will never get called

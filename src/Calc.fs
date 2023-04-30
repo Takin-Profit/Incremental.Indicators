@@ -6,10 +6,16 @@ open FSharp.Data.Adaptive
 
 // adaptive mean deviation function
 let meanDev (values: double alist) =
+
     aval {
-        let! mean = AList.average values
-        let deviation = AList.map (fun x -> abs (x - mean)) values
-        return! AList.average deviation
+        let! len = AList.count values
+
+        if len <= 0 then
+            return 0.0
+        else
+            let! mean = AList.average values
+            let deviation = AList.map (fun x -> abs (x - mean)) values
+            return! AList.average deviation
     }
 
 // adaptive Standard Deviation

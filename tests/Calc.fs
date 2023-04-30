@@ -1,9 +1,39 @@
 module Incremental.Indicators.Tests.Calc
 
-open Incremental.Indicators.Calc
 open Expecto
-open System
+open FSharp.Data.Adaptive
+open Incremental.Indicators.Calc
 
+
+
+[<Tests>]
+// A test function that tests the meanDev function
+let meanDevTests =
+    testList
+        "meanDev function tests"
+        [ testCase "calculates the mean deviation for a series of values"
+          <| fun _ ->
+              let values = [ 1.0; 2.0; 3.0; 4.0; 5.0 ] |> List.map double |> AList.ofList
+              let result = meanDev values |> AVal.force
+
+              Expect.equal result 1.2 "The function should correctly calculate the mean deviation"
+
+          testCase "calculates the mean deviation for a series with negative values"
+          <| fun _ ->
+              let values = [ -1.0; 2.0; -3.0; 4.0; -5.0 ] |> List.map double |> AList.ofList
+              let result = meanDev values |> AVal.force
+
+              Expect.equal
+                  result
+                  2.88
+                  "The function should correctly calculate the mean deviation for series with negative values"
+
+          testCase "calculates the mean deviation for an empty series"
+          <| fun _ ->
+              let values = [] |> AList.ofList
+              let result = meanDev values |> AVal.force
+
+              Expect.equal result 0.0 "The function should return 0 for an empty series" ]
 
 
 [<Tests>]
