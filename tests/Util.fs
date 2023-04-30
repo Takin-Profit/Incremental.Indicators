@@ -81,8 +81,6 @@ let findTests =
                   (aval { return { Date = DateTime.MinValue; Value = 0 } })
                   "The function should return the default value" ]
 
-open Expecto
-
 // A record type for testing purposes
 type TestRecord = { Id: int; Value: string }
 
