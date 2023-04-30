@@ -9,7 +9,6 @@
     <ItemGroup>
         <Compile Include="Calc.fs" />
         <Compile Include="Quotes.fs" />
-        <Compile Include="Series.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
