@@ -200,19 +200,19 @@ type Quotes =
     /// convert quotes to (DateTime * double) alist with open prices
     member x.OpenTuples = x.toTuples CandlePart.Open
     /// convert quotes to double alist with open prices
-    member x.OpenPrices = x.prices CandlePart.Open
+    member x.Open = x.prices CandlePart.Open
     /// convert quotes to (DateTime * double) alist with close prices
     member x.CloseTuples = x.toTuples CandlePart.Close
     /// convert quotes to double alist with close prices
-    member x.ClosePrices = x.prices CandlePart.Close
+    member x.Close = x.prices CandlePart.Close
     /// convert quotes to (DateTime * double) alist with high prices
     member x.HighTuples = x.toTuples CandlePart.High
     /// convert quotes to double alist with high prices
-    member x.HighPrices = x.prices CandlePart.High
+    member x.High = x.prices CandlePart.High
     /// convert quotes to (DateTime * double) alist with low prices
     member x.LowTuples = x.toTuples CandlePart.Low
     /// convert quotes to double alist with open prices
-    member x.LowPrices = x.prices CandlePart.Low
+    member x.Low = x.prices CandlePart.Low
     /// convert quotes to (DateTime * double) alist with volume
     member x.VolumeTuples = x.toTuples CandlePart.Volume
     /// convert quotes to double alist with volume
@@ -220,23 +220,23 @@ type Quotes =
     /// convert quotes to (DateTime * double) alist with HL2 prices
     member x.Hl2Tuples = x.toTuples CandlePart.HL2
     /// convert quotes to double alist with HL2 prices
-    member x.HL2Prices = x.prices CandlePart.HL2
+    member x.HL2 = x.prices CandlePart.HL2
     /// convert quotes to (DateTime * double) alist with HLC3 prices
     member x.HLC3Tuples = x.toTuples CandlePart.HLC3
     /// convert quotes to double alist with HLC3 prices
-    member x.HLC3Prices = x.prices CandlePart.HLC3
+    member x.HLC3 = x.prices CandlePart.HLC3
     /// convert quotes to (DateTime * double) alist with OC2 prices
     member x.OC2Tuples = x.toTuples CandlePart.OC2
     /// convert quotes to double alist with OC2 prices
-    member x.OC2Prices = x.prices CandlePart.OC2
+    member x.OC2 = x.prices CandlePart.OC2
     /// convert quotes to (DateTime * double) alist with OHL3 prices
     member x.OHL3Tuples = x.toTuples CandlePart.OHL3
     /// convert quotes to double alist with OHL3 prices
-    member x.OHL3Prices = x.prices CandlePart.OHL3
+    member x.OHL3 = x.prices CandlePart.OHL3
     /// convert quotes to (DateTime * double) alist with OHLC4 prices
     member x.OHLC4Tuples = x.toTuples CandlePart.OHLC4
     /// convert quotes to double alist with OHLC4 prices
-    member x.OHLC4Prices = x.prices CandlePart.OHLC4
+    member x.OHLC4 = x.prices CandlePart.OHLC4
 
     /// add a single quote to the list, will return an Error if a quote
     /// with the same Date is already in the list

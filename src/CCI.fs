@@ -2,34 +2,29 @@ module internal Incremental.Indicators.CCI
 
 open System
 open FSharp.Data.Adaptive
-open Quotes
 open Calc
 open Util
 
 type CciResult = { Value: float; Date: DateTime }
 
 // cci calculation function
-let calcCCI quotes (lookBack: int) =
-    // convert Quotes to QuoteD
-    let newQuotes = toQuoteDList quotes
+let calcCCI (lookBack: int) (quotes: Quotes) =
     // create typical Prices list
     let typicalPrices =
-        newQuotes |> AList.map (fun q -> (q.High + q.Low + q.Close) / 3.0)
+        quotes.DoublePrecis |> AList.map (fun q -> (q.High + q.Low + q.Close) / 3.0)
+
+    let mutable count = 0
 
     alist {
-        let! len = AList.count newQuotes
 
-        for i in 0..len do
+        for quote in quotes.DoublePrecis do
+            count <- count + 1
             // check for enough data to calculate based on lookBack length
-            if i + 1 >= lookBack then
-                // offset to grab the current typicalPrice or Quote
-                let current = i + 1
+            if count >= lookBack then
                 // get the current typical price
-                let! currentTP = getVal current 0.0 typicalPrices
-                // gets the current Quote
-                let! currentQuote = getVal current QuoteD.Empty newQuotes
+                let! currentTP = getVal count 0.0 typicalPrices
                 // position to start grabbing items from in the typicalPrices list
-                let offset = i + 1 - lookBack
+                let offset = count - lookBack
                 // grab a chunk of data from the typicalPrices list to calculate the SMA with
                 let period = AList.sub offset lookBack typicalPrices
                 // sma of typical prices over given lookBack period
@@ -46,8 +41,6 @@ let calcCCI quotes (lookBack: int) =
                     else
                         Double.NaN
 
-                yield
-                    { Value = cciValue
-                      Date = currentQuote.Date }
+                yield { Value = cciValue; Date = quote.Date }
 
     }
