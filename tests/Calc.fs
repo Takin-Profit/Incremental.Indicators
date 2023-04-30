@@ -5,6 +5,36 @@ open FSharp.Data.Adaptive
 open Incremental.Indicators.Calc
 
 
+open Expecto
+
+// A test function that tests the stdDev function
+let stdDevTests =
+    testList
+        "stdDev function tests"
+        [ testCase "calculates the standard deviation for a series of values"
+          <| fun _ ->
+              let values = [ 1.0; 2.0; 3.0; 4.0; 5.0 ] |> AList.ofList
+              let result = stdDev values |> AVal.force
+
+              Expect.equal result 2.0 "The function should correctly calculate the standard deviation"
+
+          testCase "calculates the standard deviation for a series with negative values"
+          <| fun _ ->
+              let values = [ -1.0; 2.0; -3.0; 4.0; -5.0 ] |> AList.ofList
+              let result = stdDev values |> AVal.force
+
+              Expect.equal
+                  result
+                  10.0
+                  "The function should correctly calculate the standard deviation for series with negative values"
+
+          testCase "calculates the standard deviation for an empty series"
+          <| fun _ ->
+              let values = [] |> AList.ofList
+              let result = stdDev values |> AVal.force
+
+              Expect.equal result 0.0 "The function should return 0 for an empty series" ]
+
 
 [<Tests>]
 // A test function that tests the meanDev function
