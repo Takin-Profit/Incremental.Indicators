@@ -21,9 +21,14 @@ let meanDev (values: double alist) =
 // adaptive Standard Deviation
 let stdDev (values: double alist) =
     aval {
-        let! avg = AList.average values
-        let squaredDiffs = AList.map (fun v -> (v - avg) ** 2.0) values
-        return! AList.average squaredDiffs
+        let! len = AList.count values
+
+        if len <= 0 then
+            return 0.0
+        else
+            let! avg = AList.average values
+            let squaredDiffs = AList.map (fun v -> (v - avg) ** 2.0) values
+            return! AList.average squaredDiffs
     }
 
 // this function does not do any error handling or input validation

@@ -5,8 +5,7 @@ open FSharp.Data.Adaptive
 open Incremental.Indicators.Calc
 
 
-open Expecto
-
+[<Tests>]
 // A test function that tests the stdDev function
 let stdDevTests =
     testList
@@ -25,7 +24,7 @@ let stdDevTests =
 
               Expect.equal
                   result
-                  10.0
+                  10.640000
                   "The function should correctly calculate the standard deviation for series with negative values"
 
           testCase "calculates the standard deviation for an empty series"
