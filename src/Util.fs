@@ -1,4 +1,4 @@
-module internal Incremental.Indicators.Util
+module Incremental.Indicators.Util
 
 open FSharp.Data.Adaptive
 open System
@@ -11,10 +11,6 @@ let getVal offset defaultVal list =
         return Option.defaultValue defaultVal item
     }
 
-/// slice an alist
-let slice (startIndex: int) (endIndex: int) (xs: 'a alist) =
-    xs |> AList.take (endIndex - startIndex + 1) |> AList.skip startIndex
-
 /// SEEK & FIND in SERIES
 let inline find<'TSeries when 'TSeries: (member Date: DateTime)>
     (series: 'TSeries alist)
@@ -24,7 +20,7 @@ let inline find<'TSeries when 'TSeries: (member Date: DateTime)>
     series |> AList.filter (fun x -> x.Date = lookupDate) |> getVal 0 defaultVal
 
 /// REMOVE SPECIFIC PERIODS
-let removeWarmupPeriods<'T> (series: 'T clist) (removePeriods: int) =
+let removeWarmupPeriods<'T> (series: 'T alist) (removePeriods: int) =
     if removePeriods < 0 then
         Error("the Remove Periods value must be greater than or equal to 0.")
 
