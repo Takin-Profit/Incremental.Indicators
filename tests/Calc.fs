@@ -3,6 +3,51 @@ module Incremental.Indicators.Tests.Calc
 open Expecto
 open FSharp.Data.Adaptive
 open Incremental.Indicators.Calc
+open System
+
+[<Tests>]
+let roundDownTests =
+    testList
+        "roundDown function tests"
+        [ testCase "rounds down to the nearest minute"
+          <| fun _ ->
+              let date = DateTime(2023, 5, 1, 12, 34, 59)
+              let interval = TimeSpan.FromMinutes(1.0)
+              let expectedResult = DateTime(2023, 5, 1, 12, 34, 0)
+
+              let result = roundDown date interval
+
+              Expect.equal result expectedResult "The function should round down to the nearest minute"
+
+          testCase "rounds down to the nearest hour"
+          <| fun _ ->
+              let date = DateTime(2023, 5, 1, 12, 59, 59)
+              let interval = TimeSpan.FromHours(1.0)
+              let expectedResult = DateTime(2023, 5, 1, 12, 0, 0)
+
+              let result = roundDown date interval
+
+              Expect.equal result expectedResult "The function should round down to the nearest hour"
+
+          testCase "rounds down to the nearest day"
+          <| fun _ ->
+              let date = DateTime(2023, 5, 2, 23, 59, 59)
+              let interval = TimeSpan.FromDays(1.0)
+              let expectedResult = DateTime(2023, 5, 2, 0, 0, 0)
+
+              let result = roundDown date interval
+
+              Expect.equal result expectedResult "The function should round down to the nearest day"
+
+          testCase "no rounding when interval is TimeSpan.Zero"
+          <| fun _ ->
+              let date = DateTime(2023, 5, 1, 12, 34, 59)
+              let interval = TimeSpan.Zero
+              let expectedResult = DateTime(2023, 5, 1, 12, 34, 59)
+
+              let result = roundDown date interval
+
+              Expect.equal result expectedResult "The function should not round down when interval is TimeSpan.Zero" ]
 
 
 [<Tests>]
