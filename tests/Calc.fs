@@ -6,6 +6,29 @@ open Incremental.Indicators.Calc
 
 
 [<Tests>]
+// A test function that tests the slope function
+let slopeTests =
+    testList
+        "slope function tests"
+        [ testCase "calculates the slope for two series of equal length"
+          <| fun _ ->
+              let xValues = [ 1.0; 2.0; 3.0; 4.0; 5.0 ] |> AList.ofList
+              let yValues = [ 2.0; 4.0; 6.0; 8.0; 10.0 ] |> AList.ofList
+              let result = slope xValues yValues
+              let res = AVal.force result
+              Expect.equal res (Ok 2.0) "The function should correctly calculate the slope"
+
+
+          testCase "returns error if series have different lengths"
+          <| fun _ ->
+              let xValues = [ 1.0; 2.0; 3.0; 4.0 ] |> AList.ofList
+              let yValues = [ 2.0; 4.0; 6.0; 8.0; 10.0 ] |> AList.ofList
+              let result = slope xValues yValues
+              let res = AVal.force result
+              Expect.isError res "Slope x and y must be the same size" ]
+
+
+[<Tests>]
 // A test function that tests the stdDev function
 let stdDevTests =
     testList

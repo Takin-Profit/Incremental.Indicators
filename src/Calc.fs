@@ -2,7 +2,7 @@ module Incremental.Indicators.Calc
 
 open System
 open FSharp.Data.Adaptive
-
+open Util
 
 // adaptive mean deviation function
 let meanDev (values: double alist) =
@@ -31,14 +31,30 @@ let stdDev (values: double alist) =
             return! AList.average squaredDiffs
     }
 
-// this function does not do any error handling or input validation
-// do not use outside of this module
-let private zip (x: 'X alist) (y: 'Y alist) =
-    alist {
-        for i in x do
-            for j in y do
-                yield (i, j)
-    }
+let private leastSquared (x: double alist) (y: double alist) =
+    let res =
+        alist {
+            let! len = AList.count x
+            let! avgX = AList.average x
+            let! avgY = AList.average y
+            let mutable sumSqXY = double 0
+            let mutable sumSqX = double 0
+            let mutable sumSqY = double 0
+
+            for i in 0..len do
+                let! devX = getVal i 0.0 x
+                let! devY = getVal i 0.0 y
+                let dx = devX - avgX
+                let dy = devY - avgY
+                sumSqX <- dx * dx
+                sumSqY <- dy * dy
+                sumSqXY <- dx * dy
+
+            yield sumSqXY / sumSqX
+        }
+
+    getVal 0 (double 0.0) res
+
 // SLOPE of BEST FIT LINE
 let slope (x: double alist) (y: double alist) =
     // validate params
@@ -49,14 +65,11 @@ let slope (x: double alist) (y: double alist) =
         if xLen <> yLen then
             return Error("Slope x and y must be the same size")
         else
-            let! avgX = AList.average x
-            let! avgY = AList.average y
-            let zipped = zip x y
-            let! numerator = AList.map (fun x -> (fst x - avgX) * (snd x - avgY)) zipped |> AList.sum
-            let! denominator = AList.map (fun x -> (x - avgX) ** 2.0) x |> AList.sum
-            return Ok(numerator / denominator)
+            let! res = leastSquared x y
+            return Ok(res)
 
     }
+
 
 
 // DATE ROUNDING
