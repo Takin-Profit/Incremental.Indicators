@@ -7,6 +7,57 @@ open Incremental.Indicators
 open System
 open FSharp.Data.Adaptive
 
+[<Tests>]
+let listToTuplesTests =
+    testList
+        "listToTuples tests"
+        [ testCase "OHL3 conversion"
+          <| fun _ ->
+              let quotes =
+                  AList.ofSeq
+                      [ { Quote.Empty with
+                            Date = DateTime(2023, 5, 1)
+                            Open = 100m
+                            High = 200m
+                            Low = 50m }
+                        { Quote.Empty with
+                            Date = DateTime(2023, 5, 2)
+                            Open = 110m
+                            High = 210m
+                            Low = 60m } ]
+
+              let expected =
+                  AList.ofSeq
+                      [ (DateTime(2023, 5, 1), 116.66666666666667)
+                        (DateTime(2023, 5, 2), 126.66666666666667) ]
+                  |> AList.force
+
+              let actual = listToTuples CandlePart.OHL3 quotes |> AList.force
+              Expect.equal actual expected "Expected tuples for OHL3 conversion"
+
+          testCase "OHLC4 conversion"
+          <| fun _ ->
+              let quotes =
+                  AList.ofSeq
+                      [ { Quote.Empty with
+                            Date = DateTime(2023, 5, 1)
+                            Open = 100m
+                            High = 200m
+                            Low = 50m
+                            Close = 150m }
+                        { Quote.Empty with
+                            Date = DateTime(2023, 5, 2)
+                            Open = 110m
+                            High = 210m
+                            Low = 60m
+                            Close = 160m } ]
+
+              let expected =
+                  AList.ofSeq [ (DateTime(2023, 5, 1), 125.0); (DateTime(2023, 5, 2), 135.0) ]
+                  |> AList.force
+
+              let actual = listToTuples CandlePart.OHLC4 quotes |> AList.force
+              Expect.equal actual expected "Expected tuples for OHLC4 conversion" ]
 
 [<Tests>]
 let toTupleTests =
