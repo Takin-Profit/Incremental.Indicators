@@ -86,7 +86,7 @@ module internal Quotes =
         | CandlePart.Close -> (q.Date, double q.Close)
         | CandlePart.Volume -> (q.Date, double q.Volume)
         | CandlePart.HL2 -> (q.Date, double (q.High + q.Low) / 2.0)
-        | CandlePart.HLC3 -> (q.Date, double (q.High + q.Open + q.Close) / 3.0)
+        | CandlePart.HLC3 -> (q.Date, double (q.High + q.Low + q.Close) / 3.0)
         | CandlePart.OC2 -> (q.Date, double (q.Open + q.Close) / 2.0)
         | CandlePart.OHL3 -> (q.Date, double (q.Open + q.High + q.Low) / 3.0)
         | CandlePart.OHLC4 -> (q.Date, double (q.Open + q.High + q.Low + q.Close) / 4.0)

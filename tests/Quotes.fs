@@ -2,10 +2,134 @@ module Incremental.Indicators.Tests.Quotes
 
 open Expecto
 open Incremental.Indicators.Quotes
+open Incremental.Indicators.Types
 open Incremental.Indicators
 open System
 open FSharp.Data.Adaptive
 
+
+[<Tests>]
+let toTupleTests =
+    testList
+        "toTuple tests"
+        [ testCase "CandlePart.Open"
+          <| fun _ ->
+              let quote =
+                  { Quote.Empty with
+                      Date = DateTime(2023, 5, 1)
+                      Open = 100m }
+
+              let expected = (DateTime(2023, 5, 1), 100.0)
+              let actual = toTuple CandlePart.Open quote
+              Expect.equal actual expected "Expected tuple for Open"
+
+          testCase "CandlePart.High"
+          <| fun _ ->
+              let quote =
+                  { Quote.Empty with
+                      Date = DateTime(2023, 5, 1)
+                      High = 200m }
+
+              let expected = (DateTime(2023, 5, 1), 200.0)
+              let actual = toTuple CandlePart.High quote
+              Expect.equal actual expected "Expected tuple for High"
+
+          testCase "CandlePart.Low"
+          <| fun _ ->
+              let quote =
+                  { Quote.Empty with
+                      Date = DateTime(2023, 5, 1)
+                      Low = 50m }
+
+              let expected = (DateTime(2023, 5, 1), 50.0)
+              let actual = toTuple CandlePart.Low quote
+              Expect.equal actual expected "Expected tuple for Low"
+
+          testCase "CandlePart.Close"
+          <| fun _ ->
+              let quote =
+                  { Quote.Empty with
+                      Date = DateTime(2023, 5, 1)
+                      Close = 150m }
+
+              let expected = (DateTime(2023, 5, 1), 150.0)
+              let actual = toTuple CandlePart.Close quote
+              Expect.equal actual expected "Expected tuple for Close"
+
+          testCase "CandlePart.Volume"
+          <| fun _ ->
+              let quote =
+                  { Quote.Empty with
+                      Date = DateTime(2023, 5, 1)
+                      Volume = 300m }
+
+              let expected = (DateTime(2023, 5, 1), 300.0)
+              let actual = toTuple CandlePart.Volume quote
+              Expect.equal actual expected "Expected tuple for Volume"
+
+          testCase "CandlePart.HL2"
+          <| fun _ ->
+              let quote =
+                  { Quote.Empty with
+                      Date = DateTime(2023, 5, 1)
+                      High = 200m
+                      Low = 50m }
+
+              let expected = (DateTime(2023, 5, 1), 125.0)
+              let actual = toTuple CandlePart.HL2 quote
+              Expect.equal actual expected "Expected tuple for HL2"
+
+          testCase "CandlePart.HLC3"
+          <| fun _ ->
+              let quote =
+                  { Quote.Empty with
+                      Date = DateTime(2023, 5, 1)
+                      High = 200m
+                      Low = 50m
+                      Close = 150m }
+
+              let expected = (DateTime(2023, 5, 1), 133.33333333333334)
+              let actual = toTuple CandlePart.HLC3 quote
+              Expect.equal actual expected "Expected tuple for HLC3"
+
+          testCase "CandlePart.OC2"
+          <| fun _ ->
+              let quote =
+                  { Quote.Empty with
+                      Date = DateTime(2023, 5, 1)
+                      Open = 100m
+                      Close = 150m }
+
+              let expected = (DateTime(2023, 5, 1), 125.0)
+              let actual = toTuple CandlePart.OC2 quote
+              Expect.equal actual expected "Expected"
+
+          testCase "CandlePart.OHL3"
+          <| fun _ ->
+              let quote =
+                  { Quote.Empty with
+                      Date = DateTime(2023, 5, 1)
+                      Open = 100m
+                      High = 200m
+                      Low = 50m }
+
+              let expected = (DateTime(2023, 5, 1), 116.66666666666667)
+              let actual = toTuple CandlePart.OHL3 quote
+              Expect.equal actual expected "Expected tuple for OHL3"
+
+          testCase "CandlePart.OHLC4"
+          <| fun _ ->
+              let quote =
+                  { Quote.Empty with
+                      Date = DateTime(2023, 5, 1)
+                      Open = 100m
+                      High = 200m
+                      Low = 50m
+                      Close = 150m }
+
+              let expected = (DateTime(2023, 5, 1), 125.0)
+              let actual = toTuple CandlePart.OHLC4 quote
+              Expect.equal actual expected "Expected tuple for OHLC4" ]
 
 [<Tests>]
 let validateTests =
