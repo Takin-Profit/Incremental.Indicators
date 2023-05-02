@@ -9,6 +9,7 @@
     <ItemGroup>
         <Compile Include="Calc.fs" />
         <Compile Include="Util.fs" />
+        <Compile Include="Types.fs" />
         <Compile Include="Quotes.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
