@@ -2,10 +2,8 @@ namespace Incremental.Indicators
 
 open System
 open FSharp.Data.Adaptive
-open Incremental.Indicators.Types
 open Types
 open Calc
-
 
 type Quote =
     { Date: DateTime

@@ -10,8 +10,6 @@ type SyncType =
     | RemoveOnly
     | FullMatch
 
-
-
 let inline syncIndex<'TResultA, 'TResultB when 'TResultA: (member Date: DateTime) and 'TResultA: equality>
     (syncMe: 'TResultA alist)
     (toMatch: 'TResultA alist)
