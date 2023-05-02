@@ -7,6 +7,65 @@ open Incremental.Indicators
 open System
 open FSharp.Data.Adaptive
 
+[<Tests>]
+let quoteDListToToTuplesTests =
+    testList
+        "quoteDListToToTuples tests"
+        [ testCase "Convert QuoteD list to tuples for CandlePart.OHL3"
+          <| fun _ ->
+              let quoteDList =
+                  AList.ofSeq
+                      [ { QuoteD.Empty with
+                            Date = DateTime(2023, 5, 1)
+                            Open = 100.0
+                            High = 200.0
+                            Low = 50.0
+                            Close = 150.0
+                            Volume = 500.0 }
+                        { QuoteD.Empty with
+                            Date = DateTime(2023, 5, 2)
+                            Open = 110.0
+                            High = 210.0
+                            Low = 60.0
+                            Close = 160.0
+                            Volume = 600.0 } ]
+
+              let expected =
+                  AList.ofSeq
+                      [ (DateTime(2023, 5, 1), (100.0 + 200.0 + 50.0) / 3.0)
+                        (DateTime(2023, 5, 2), (110.0 + 210.0 + 60.0) / 3.0) ]
+                  |> AList.force
+
+              let actual = quoteDListToToTuples CandlePart.OHL3 quoteDList |> AList.force
+              Expect.equal actual expected "Expected tuples from QuoteD list for CandlePart.OHL3"
+
+          testCase "Convert QuoteD list to tuples for CandlePart.OHLC4"
+          <| fun _ ->
+              let quoteDList =
+                  AList.ofSeq
+                      [ { QuoteD.Empty with
+                            Date = DateTime(2023, 5, 1)
+                            Open = 100.0
+                            High = 200.0
+                            Low = 50.0
+                            Close = 150.0
+                            Volume = 500.0 }
+                        { QuoteD.Empty with
+                            Date = DateTime(2023, 5, 2)
+                            Open = 110.0
+                            High = 210.0
+                            Low = 60.0
+                            Close = 160.0
+                            Volume = 600.0 } ]
+
+              let expected =
+                  AList.ofSeq
+                      [ (DateTime(2023, 5, 1), (100.0 + 200.0 + 50.0 + 150.0) / 4.0)
+                        (DateTime(2023, 5, 2), (110.0 + 210.0 + 60.0 + 160.0) / 4.0) ]
+                  |> AList.force
+
+              let actual = quoteDListToToTuples CandlePart.OHLC4 quoteDList |> AList.force
+              Expect.equal actual expected "Expected tuples from QuoteD list for CandlePart.OHLC4" ]
 
 [<Tests>]
 let toQuoteDListTests =
