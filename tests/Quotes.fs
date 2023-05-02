@@ -7,6 +7,51 @@ open Incremental.Indicators
 open System
 open FSharp.Data.Adaptive
 
+
+[<Tests>]
+let toQuoteDListTests =
+    testList
+        "toQuoteDList tests"
+        [ testCase "Convert Quote list to QuoteD list"
+          <| fun _ ->
+              let quotes =
+                  AList.ofSeq
+                      [ { Quote.Empty with
+                            Date = DateTime(2023, 5, 1)
+                            Open = 100m
+                            High = 200m
+                            Low = 50m
+                            Close = 150m
+                            Volume = 500m }
+                        { Quote.Empty with
+                            Date = DateTime(2023, 5, 2)
+                            Open = 110m
+                            High = 210m
+                            Low = 60m
+                            Close = 160m
+                            Volume = 600m } ]
+
+              let expected =
+                  AList.ofSeq
+                      [ { QuoteD.Empty with
+                            Date = DateTime(2023, 5, 1)
+                            Open = 100.0
+                            High = 200.0
+                            Low = 50.0
+                            Close = 150.0
+                            Volume = 500.0 }
+                        { QuoteD.Empty with
+                            Date = DateTime(2023, 5, 2)
+                            Open = 110.0
+                            High = 210.0
+                            Low = 60.0
+                            Close = 160.0
+                            Volume = 600.0 } ]
+                  |> AList.force
+
+              let actual = toQuoteDList quotes |> AList.force
+              Expect.equal actual expected "Expected QuoteD list from Quote list" ]
+
 [<Tests>]
 let listToTuplesTests =
     testList
