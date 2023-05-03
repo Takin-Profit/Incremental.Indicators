@@ -8,29 +8,25 @@ open System
 let getCsvRow = CsvFile.Load(__SOURCE_DIRECTORY__ + "/../data/MSFT.csv").Cache()
 
 
-let rec quoteFromCsv (row: CsvRow) =
-    let parseDate str =
-        try
-            let dt = DateTime.Parse str
-            Some dt
-        with _ ->
-            None
+let quoteFromCsv (row: CsvRow) =
+    if row.Columns |> Array.contains "" then
+        None
+    else
 
-    let date = row.GetColumn "date" |> parseDate
-    let opn = row.GetColumn "open" |> decimal
-    let close = row.GetColumn "close" |> decimal
-    let high = row.GetColumn "high" |> decimal
-    let low = row.GetColumn "low" |> decimal
-    let vol = row.GetColumn "volume" |> decimal
+        let parseDate str =
+            try
+                let dt = DateTime.Parse str
+                Some dt
+            with _ ->
+                None
 
-    match date with
-    | None -> None
-    | Some dt ->
-        Some(
+        let date = row.GetColumn "date" |> parseDate
+
+        date
+        |> Option.map (fun dt ->
             { Quote.Date = dt
-              Open = opn
-              High = high
-              Low = low
-              Close = close
-              Volume = vol }
-        )
+              Open = row.GetColumn "open" |> decimal
+              High = row.GetColumn "high" |> decimal
+              Low = row.GetColumn "low" |> decimal
+              Close = row.GetColumn "close" |> decimal
+              Volume = row.GetColumn "volume" |> decimal })
