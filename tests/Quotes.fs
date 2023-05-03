@@ -7,6 +7,165 @@ open Incremental.Indicators
 open System
 open FSharp.Data.Adaptive
 
+
+let aggregateByTimeFrameTests =
+
+    let sampleQuotes =
+        [ { Quote.Date = DateTime(2023, 5, 1, 12, 0, 0)
+            Open = 10m
+            High = 15m
+            Low = 8m
+            Close = 12m
+            Volume = 100m }
+          { Quote.Date = DateTime(2023, 5, 1, 12, 5, 0)
+            Open = 12m
+            High = 16m
+            Low = 9m
+            Close = 13m
+            Volume = 120m }
+          { Quote.Date = DateTime(2023, 5, 1, 12, 10, 0)
+            Open = 13m
+            High = 17m
+            Low = 10m
+            Close = 14m
+            Volume = 140m } ]
+
+    testList
+        "aggregateByTimeFrame function tests"
+        [ testCase "aggregates quotes by 5 minutes"
+          <| fun _ ->
+              let quotes = AList.ofList sampleQuotes
+              let timeFrame = TimeFrame.FiveMin
+
+              let result =
+                  aggregateByTimeFrame timeFrame quotes |> Result.defaultValue AList.empty
+
+              let expectedResult =
+                  [ { Quote.Date = DateTime(2023, 5, 1, 12, 0, 0)
+                      Open = 10m
+                      High = 15m
+                      Low = 8m
+                      Close = 12m
+                      Volume = 100m }
+                    { Quote.Date = DateTime(2023, 5, 1, 12, 5, 0)
+                      Open = 12m
+                      High = 16m
+                      Low = 9m
+                      Close = 13m
+                      Volume = 120m }
+                    { Quote.Date = DateTime(2023, 5, 1, 12, 10, 0)
+                      Open = 13m
+                      High = 17m
+                      Low = 10m
+                      Close = 14m
+                      Volume = 140m } ]
+                  |> IndexList.ofList
+
+              Expect.equal (AList.force result) expectedResult "The function should aggregate quotes by 5 minutes"
+
+          testCase "aggregates quotes by month"
+          <| fun _ ->
+              let quotes = AList.ofList sampleQuotes
+              let timeFrame = TimeFrame.Month
+
+              let result =
+                  aggregateByTimeFrame timeFrame quotes |> Result.defaultValue AList.empty
+
+              let expectedResult =
+                  [ { Quote.Date = DateTime(2023, 5, 1)
+                      Open = 10m
+                      High = 17m
+                      Low = 8m
+                      Close = 14m
+                      Volume = 360m } ]
+                  |> IndexList.ofList
+
+              Expect.equal (AList.force result) expectedResult "The function should aggregate quotes by month" ]
+
+
+[<Tests>]
+let aggregateByTimeSpanTests =
+    testList
+        "aggregateByTimeSpan tests"
+        [ testCase "Aggregate quotes by valid TimeSpan"
+          <| fun _ ->
+              let quotes =
+                  AList.ofSeq
+                      [ { Quote.Empty with
+                            Date = DateTime(2023, 5, 1, 9, 0, 0)
+                            Open = 100m
+                            High = 200m
+                            Low = 50m
+                            Close = 150m
+                            Volume = 500m }
+                        { Quote.Empty with
+                            Date = DateTime(2023, 5, 1, 9, 30, 0)
+                            Open = 110m
+                            High = 210m
+                            Low = 60m
+                            Close = 160m
+                            Volume = 600m }
+                        { Quote.Empty with
+                            Date = DateTime(2023, 5, 1, 10, 0, 0)
+                            Open = 120m
+                            High = 220m
+                            Low = 70m
+                            Close = 170m
+                            Volume = 700m } ]
+
+              let timeSpan = TimeSpan.FromHours(1.0)
+
+              let expected =
+                  AList.ofSeq
+                      [ { Quote.Empty with
+                            Date = DateTime(2023, 5, 1, 9, 0, 0)
+                            Open = 100m
+                            High = 210m
+                            Low = 50m
+                            Close = 160m
+                            Volume = 1100m }
+                        { Quote.Empty with
+                            Date = DateTime(2023, 5, 1, 10, 0, 0)
+                            Open = 120m
+                            High = 220m
+                            Low = 70m
+                            Close = 170m
+                            Volume = 700m } ]
+                  |> AList.force
+
+              let actualResult = aggregateByTimeSpan timeSpan quotes
+
+              match actualResult with
+              | Ok actual -> Expect.equal (AList.force actual) expected "Expected aggregated quotes for valid TimeSpan"
+              | Error msg -> failwithf $"Expected Ok, got Error: %s{msg}"
+
+          testCase "Aggregate quotes by zero TimeSpan"
+          <| fun _ ->
+              let quotes =
+                  AList.ofSeq
+                      [ { Quote.Empty with
+                            Date = DateTime(2023, 5, 1, 9, 0, 0)
+                            Open = 100m
+                            High = 200m
+                            Low = 50m
+                            Close = 150m
+                            Volume = 500m }
+                        { Quote.Empty with
+                            Date = DateTime(2023, 5, 1, 9, 30, 0)
+                            Open = 110m
+                            High = 210m
+                            Low = 60m
+                            Close = 160m
+                            Volume = 600m } ]
+
+              let timeSpan = TimeSpan.Zero
+              let actualResult = aggregateByTimeSpan timeSpan quotes
+
+              match actualResult with
+              | Ok _ -> failwith "Expected Error, got Ok"
+              | Error msg ->
+                  Expect.stringContains msg "usable new size value" "Expected error message for zero TimeSpan" ]
+
 [<Tests>]
 let quoteDListToToTuplesTests =
     testList

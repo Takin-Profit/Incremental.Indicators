@@ -7,8 +7,9 @@
         <RootNamespace>Incremental.Indicators.Tests</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="Calc.fs" />
+        <Folder Include="Data\" />
         <Compile Include="Util.fs" />
+        <Compile Include="Calc.fs" />
         <Compile Include="Types.fs" />
         <Compile Include="Quotes.fs" />
         <Compile Include="Main.fs" />
