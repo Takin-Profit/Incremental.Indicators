@@ -47,7 +47,7 @@ let private getQuotes file days =
     else
         quotes
         |> Seq.map (fun t -> Option.defaultValue Quote.Empty t)
+        |> Seq.take days
+        |> Seq.sortByDescending (fun t -> t.Date)
         |> AList.ofSeq
         |> Some
-        |> Option.map (AList.take days)
-        |> Option.map (AList.sortByDescending (fun t -> t.Date))
