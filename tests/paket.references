@@ -7,3 +7,4 @@ group Test
     Expecto.FsCheck
     Expecto.Hopac
     Logary.Adapters.Facade
+    FSharp.Data.Csv.Core

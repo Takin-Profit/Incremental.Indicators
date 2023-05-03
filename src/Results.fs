@@ -41,7 +41,7 @@ let inline syncIndex<'TResultA, 'TResultB when 'TResultA: (member Date: DateTime
         }
 
     if AVal.force isEmpty then
-        ASet.empty
+        AList.empty
     // add plugs for missing values
     elif prepend || append then
         let toAppend =
@@ -57,7 +57,7 @@ let inline syncIndex<'TResultA, 'TResultB when 'TResultA: (member Date: DateTime
                     | _ -> ()
             }
 
-        AList.append syncMeList toAppend |> AList.toASet
+        AList.append syncMeList toAppend
     // remove unmatched results
     elif remove then
         let toRemove =
@@ -71,7 +71,7 @@ let inline syncIndex<'TResultA, 'TResultB when 'TResultA: (member Date: DateTime
             }
 
         let ls =
-            aset {
+            alist {
                 for s in syncMeList do
                     for r in toRemove do
                         if s <> r then
@@ -80,7 +80,7 @@ let inline syncIndex<'TResultA, 'TResultB when 'TResultA: (member Date: DateTime
 
         ls
     else
-        ASet.empty
+        AList.empty
 
 // convert any Result type in to (DateTime * double) alist
 let inline toTuples<'TResult when 'TResult: (member Date: DateTime) and 'TResult: (member Value: double)>

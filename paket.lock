@@ -53,6 +53,14 @@ NUGET
     FsCheck (2.16.5) - restriction: || (>= net461) (>= netstandard2.0)
       FSharp.Core (>= 4.2.3) - restriction: || (>= net452) (>= netstandard1.6)
     FSharp.Core (7.0.200)
+    FSharp.Data.Csv.Core (6.2)
+      FSharp.Core (>= 5.0.1) - restriction: >= netstandard2.0
+      FSharp.Data.Runtime.Utilities (>= 6.2) - restriction: >= netstandard2.0
+    FSharp.Data.Http (6.2) - restriction: >= netstandard2.0
+      FSharp.Core (>= 5.0.1) - restriction: >= netstandard2.0
+    FSharp.Data.Runtime.Utilities (6.2) - restriction: >= netstandard2.0
+      FSharp.Core (>= 5.0.1) - restriction: >= netstandard2.0
+      FSharp.Data.Http (>= 6.2) - restriction: >= netstandard2.0
     Gee.External.Capstone (2.3) - restriction: >= netstandard2.0
     Hopac (0.5.1) - restriction: || (>= net461) (>= netstandard2.0)
       FSharp.Core (>= 4.5.2) - restriction: >= netstandard2.0
