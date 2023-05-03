@@ -9,7 +9,7 @@
     <ItemGroup>
         <Folder Include="Data\" />
         <Compile Include="RandomGMB.fs" />
-        <Compile Include="CsvReader.fs" />
+        <Compile Include="TestData.fs" />
         <Compile Include="Util.fs" />
         <Compile Include="Calc.fs" />
         <Compile Include="Types.fs" />
