@@ -24,7 +24,16 @@ let aggregateMonthTests =
         [ testCase "should have proper quantities"
           <| fun _ ->
               let result = monthlyQuotes.Count
-              Expect.equal result 24 "should be 24 quotes" ]
+              Expect.equal result 24 "should be 24 quotes"
+
+          testCase "quotes should have correct values"
+          <| fun _ ->
+              let result = monthlyQuotes[0]
+              Expect.equal result.Date (DateTime.Parse("2017-01-01")) "should have correct date"
+              Expect.equal result.Open 212.61m "should have correct Open price"
+              Expect.equal result.Low 211.52m "should have correct Low price"
+              Expect.equal result.Close 214.96m "should have correct Low price"
+              Expect.equal result.Volume 1569087580m "should have correct Volume" ]
 
 [<Tests>]
 let aggregateByTimeFrameTests =
