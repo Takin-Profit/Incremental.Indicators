@@ -3,6 +3,7 @@ module Incremental.Indicators.Tests.Calc
 open Expecto
 open FSharp.Data.Adaptive
 open Incremental.Indicators.Calc
+open Incremental.Indicators.Types
 open System
 
 let longishQuotes = TestData.getLongish 5285 |> Option.defaultValue AList.empty
@@ -54,7 +55,15 @@ let roundDownTests =
 
               let result = roundDown date interval
 
-              Expect.equal result expectedResult "The function should not round down when interval is TimeSpan.Zero" ]
+              Expect.equal result expectedResult "The function should not round down when interval is TimeSpan.Zero"
+
+          testCase "should roundDown an interval correctly"
+          <| fun _ ->
+              let interval = toTimeSpan TimeFrame.OneHour
+              let evDate = DateTime.Parse("2020-12-15 09:35:45")
+              let rnDate = roundDown evDate interval
+              let exDate = DateTime.Parse("2020-12-15 09:00:00")
+              Expect.equal exDate rnDate "should return correct DateTime" ]
 
 
 [<Tests>]
