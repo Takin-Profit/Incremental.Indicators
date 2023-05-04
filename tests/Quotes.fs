@@ -50,7 +50,12 @@ let aggregateMonthTests =
               Expect.equal result2.High 273.59m "should have correct High price"
               Expect.equal result2.Low 229.42m "should have correct Low price"
               Expect.equal result2.Close 245.28m "should have correct Close price"
-              Expect.equal result2.Volume 3173255968m "should have correct Volume" ]
+              Expect.equal result2.Volume 3173255968m "should have correct Volume"
+
+          testCase "should return an Error for invalid timeSpan"
+          <| fun _ ->
+              let bad = aggregateByTimeSpan TimeSpan.Zero defaultQuotes
+              Expect.isError bad "should return an error" ]
 
 [<Tests>]
 let aggregateByTimeFrameTests =
