@@ -3,12 +3,15 @@ module Incremental.Indicators.Tests.Quotes
 open Expecto
 open Incremental.Indicators.Quotes
 open Incremental.Indicators.Types
+open Incremental.Indicators.Util
 open Incremental.Indicators
 open System
 open FSharp.Data.Adaptive
 
-
+[<Tests>]
 let aggregateByTimeFrameTests =
+    let intraDay = TestData.getIntraDay 1564
+    let testQuotes = Option.defaultValue AList.empty intraDay
 
     let sampleQuotes =
         [ { Quote.Date = DateTime(2023, 5, 1, 12, 0, 0)
@@ -80,7 +83,27 @@ let aggregateByTimeFrameTests =
                       Volume = 360m } ]
                   |> IndexList.ofList
 
-              Expect.equal (AList.force result) expectedResult "The function should aggregate quotes by month" ]
+              Expect.equal (AList.force result) expectedResult "The function should aggregate quotes by month"
+
+          testCase "aggregates quotes returns proper quantities"
+          <| fun _ ->
+              let result =
+                  aggregateByTimeFrame TimeFrame.FifteenMin testQuotes
+                  |> Result.defaultValue AList.empty
+
+              let count = AList.count result |> AVal.force
+
+              Expect.equal count 108 "aggregate should return proper count"
+
+          testCase "quotes should have correct values"
+          <| fun _ ->
+              let result1 = getVal 0 Quote.Empty testQuotes |> AVal.force
+              Expect.equal result1.Date (DateTime.Parse("2020-12-15 09:30")) "should have correct date"
+              Expect.equal result1.Open 367.40m "should have correct open"
+              Expect.equal result1.High 367.775m "should have correct high"
+              Expect.equal result1.Low 367.02m "should have correct low"
+              Expect.equal result1.Close 367.24m "should have correct close"
+              Expect.equal result1.Volume 2401786m "should have correct volume" ]
 
 
 [<Tests>]
