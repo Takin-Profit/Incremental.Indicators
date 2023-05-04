@@ -8,14 +8,29 @@ open Incremental.Indicators
 open System
 open FSharp.Data.Adaptive
 
-let intraDay = TestData.getIntraDay 1564
-let testQuotes = Option.defaultValue AList.empty intraDay
+let defaultQuotes = TestData.getDefault 502 |> Option.defaultValue AList.empty
+let intraDayQuotes = TestData.getIntraDay 1564 |> Option.defaultValue AList.empty
+
+[<Tests>]
+let aggregateMonthTests =
+    let monthlyQuotes =
+        aggregateByTimeFrame TimeFrame.Month defaultQuotes
+        |> Result.defaultValue AList.empty
+        |> AList.force
+
+    testList
+        "aggregate Month timeFrame tests"
+
+        [ testCase "should have proper quantities"
+          <| fun _ ->
+              let result = monthlyQuotes.Count
+              Expect.equal result 24 "should be 24 quotes" ]
 
 [<Tests>]
 let aggregateByTimeFrameTests =
 
     let fifteenMin =
-        aggregateByTimeFrame TimeFrame.FifteenMin testQuotes
+        aggregateByTimeFrame TimeFrame.FifteenMin intraDayQuotes
         |> Result.defaultValue AList.empty
 
     let sampleQuotes =
@@ -138,7 +153,7 @@ let aggregateByTimeFrameTests =
 [<Tests>]
 let aggregateByTimeSpanTests =
     let fifteenMin =
-        aggregateByTimeSpan (TimeSpan.FromMinutes 15) testQuotes
+        aggregateByTimeSpan (TimeSpan.FromMinutes 15) intraDayQuotes
         |> Result.defaultValue AList.empty
         |> AList.force
 

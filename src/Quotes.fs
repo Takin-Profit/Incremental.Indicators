@@ -175,7 +175,6 @@ module internal Quotes =
                   Volume = IndexList.sumBy (fun (t: Quote) -> t.Volume) v })
             |> AMap.toASetValues
             |> ASet.toAList
-            |> AList.sortBy (fun t -> t.Date)
             |> Ok
 
 
