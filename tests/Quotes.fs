@@ -112,7 +112,15 @@ let aggregateByTimeFrameTests =
               Expect.equal result2.High 367.44m "should have correct high"
               Expect.equal result2.Low 366.69m "should have correct low"
               Expect.equal result2.Close 366.86m "should have correct close"
-              Expect.equal result2.Volume 1669983m "should have correct volume" ]
+              Expect.equal result2.Volume 1669983m "should have correct volume"
+
+              let result3 = getVal 2 Quote.Empty fifteenMin |> AVal.force
+              Expect.equal result3.Date (DateTime.Parse("2020-12-15 10:00")) "should have correct date"
+              Expect.equal result3.Open 366.85m "should have correct open"
+              Expect.equal result3.High 367.17m "should have correct high"
+              Expect.equal result3.Low 366.57m "should have correct low"
+              Expect.equal result3.Close 366.97m "should have correct close"
+              Expect.equal result3.Volume 1396993m "should have correct volume" ]
 
 
 [<Tests>]
