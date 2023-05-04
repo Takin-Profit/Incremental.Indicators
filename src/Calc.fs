@@ -11,7 +11,7 @@ let meanDev (values: double alist) =
         let! len = AList.count values
 
         if len <= 0 then
-            return 0.0
+            return double 0.0
         else
             let! mean = AList.average values
             let deviation = AList.map (fun x -> abs (x - mean)) values
@@ -24,11 +24,12 @@ let stdDev (values: double alist) =
         let! len = AList.count values
 
         if len <= 0 then
-            return 0.0
+            return double 0.0
         else
             let! avg = AList.average values
             let squaredDiffs = AList.map (fun v -> (v - avg) ** 2.0) values
-            return! AList.average squaredDiffs
+            let! variance = AList.average squaredDiffs
+            return sqrt variance
     }
 
 let private leastSquared (x: double alist) (y: double alist) =

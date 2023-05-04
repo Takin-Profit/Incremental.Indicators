@@ -5,6 +5,13 @@ open FSharp.Data.Adaptive
 open Incremental.Indicators.Calc
 open System
 
+let longishQuotes = TestData.getLongish 5285 |> Option.defaultValue AList.empty
+let closePrices = longishQuotes |> AList.map (fun t -> double t.Close)
+
+let x: double list = [ 1.0; 2.0; 3.0; 4.0; 5.0 ]
+
+let y: double list = [ 0.0; 0.0; 0.0; 0.0 ]
+
 [<Tests>]
 let roundDownTests =
     testList
@@ -83,7 +90,10 @@ let stdDevTests =
               let values = [ 1.0; 2.0; 3.0; 4.0; 5.0 ] |> AList.ofList
               let result = stdDev values |> AVal.force
 
-              Expect.equal result 2.0 "The function should correctly calculate the standard deviation"
+              Expect.equal
+                  (round (result * 1000.0))
+                  (round (1.4142 * 1000.0))
+                  "The function should correctly calculate the standard deviation"
 
           testCase "calculates the standard deviation for a series with negative values"
           <| fun _ ->
@@ -91,8 +101,8 @@ let stdDevTests =
               let result = stdDev values |> AVal.force
 
               Expect.equal
-                  result
-                  10.640000
+                  (round result)
+                  (round 3.261901)
                   "The function should correctly calculate the standard deviation for series with negative values"
 
           testCase "calculates the standard deviation for an empty series"
@@ -100,7 +110,12 @@ let stdDevTests =
               let values = [] |> AList.ofList
               let result = stdDev values |> AVal.force
 
-              Expect.equal result 0.0 "The function should return 0 for an empty series" ]
+              Expect.equal result 0.0 "The function should return 0 for an empty series"
+
+          testCase "calculates the standard deviation for large list"
+          <| fun _ ->
+              let result = stdDev closePrices |> AVal.force
+              Expect.equal (Math.Round(result, 9)) 633.932098287 "The function should return" ]
 
 
 [<Tests>]
