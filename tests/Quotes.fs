@@ -31,9 +31,26 @@ let aggregateMonthTests =
               let result = monthlyQuotes[0]
               Expect.equal result.Date (DateTime.Parse("2017-01-01")) "should have correct date"
               Expect.equal result.Open 212.61m "should have correct Open price"
+              Expect.equal result.High 217.02m "should have correct High price"
               Expect.equal result.Low 211.52m "should have correct Low price"
-              Expect.equal result.Close 214.96m "should have correct Low price"
-              Expect.equal result.Volume 1569087580m "should have correct Volume" ]
+              Expect.equal result.Close 214.96m "should have correct Close price"
+              Expect.equal result.Volume 1569087580m "should have correct Volume"
+
+              let result1 = monthlyQuotes[1]
+              Expect.equal result1.Date (DateTime.Parse("2017-02-01")) "should have correct date"
+              Expect.equal result1.Open 215.65m "should have correct Open price"
+              Expect.equal result1.High 224.20m "should have correct High price"
+              Expect.equal result1.Low 214.29m "should have correct Low price"
+              Expect.equal result1.Close 223.41m "should have correct Close price"
+              Expect.equal result1.Volume 1444958340m "should have correct Volume"
+
+              let result2 = monthlyQuotes[23]
+              Expect.equal result2.Date (DateTime.Parse("2018-12-01")) "should have correct date"
+              Expect.equal result2.Open 273.47m "should have correct Open price"
+              Expect.equal result2.High 273.59m "should have correct High price"
+              Expect.equal result2.Low 229.42m "should have correct Low price"
+              Expect.equal result2.Close 245.28m "should have correct Close price"
+              Expect.equal result2.Volume 3173255968m "should have correct Volume" ]
 
 [<Tests>]
 let aggregateByTimeFrameTests =
