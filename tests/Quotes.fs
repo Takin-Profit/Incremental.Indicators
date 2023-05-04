@@ -8,10 +8,11 @@ open Incremental.Indicators
 open System
 open FSharp.Data.Adaptive
 
+let intraDay = TestData.getIntraDay 1564
+let testQuotes = Option.defaultValue AList.empty intraDay
+
 [<Tests>]
 let aggregateByTimeFrameTests =
-    let intraDay = TestData.getIntraDay 1564
-    let testQuotes = Option.defaultValue AList.empty intraDay
 
     let fifteenMin =
         aggregateByTimeFrame TimeFrame.FifteenMin testQuotes
@@ -136,6 +137,11 @@ let aggregateByTimeFrameTests =
 
 [<Tests>]
 let aggregateByTimeSpanTests =
+    let fifteenMin =
+        aggregateByTimeSpan (TimeSpan.FromMinutes 15) testQuotes
+        |> Result.defaultValue AList.empty
+        |> AList.force
+
     testList
         "aggregateByTimeSpan tests"
         [ testCase "Aggregate quotes by valid TimeSpan"
@@ -215,7 +221,49 @@ let aggregateByTimeSpanTests =
               match actualResult with
               | Ok _ -> failwith "Expected Error, got Ok"
               | Error msg ->
-                  Expect.stringContains msg "usable new size value" "Expected error message for zero TimeSpan" ]
+                  Expect.stringContains msg "usable new size value" "Expected error message for zero TimeSpan"
+
+          testCase "should return correct number of results"
+          <| fun _ ->
+              let result = fifteenMin.Count
+              Expect.equal result 108 "should be 108"
+
+          testCase "quotes should have correct values"
+          <| fun _ ->
+              let result1 = fifteenMin[0]
+              Expect.equal result1.Date (DateTime.Parse("2020-12-15 09:30")) "should have correct date"
+              Expect.equal result1.Open 367.40m "should have correct open"
+              Expect.equal result1.High 367.775m "should have correct high"
+              Expect.equal result1.Low 367.02m "should have correct low"
+              Expect.equal result1.Close 367.24m "should have correct close"
+              Expect.equal result1.Volume 2401786m "should have correct volume"
+
+              let result2 = fifteenMin[1]
+              Expect.equal result2.Date (DateTime.Parse("2020-12-15 09:45")) "should have correct date"
+              Expect.equal result2.Open 367.25m "should have correct open"
+              Expect.equal result2.High 367.44m "should have correct high"
+              Expect.equal result2.Low 366.69m "should have correct low"
+              Expect.equal result2.Close 366.86m "should have correct close"
+              Expect.equal result2.Volume 1669983m "should have correct volume"
+
+              let result3 = fifteenMin[2]
+              Expect.equal result3.Date (DateTime.Parse("2020-12-15 10:00")) "should have correct date"
+              Expect.equal result3.Open 366.85m "should have correct open"
+              Expect.equal result3.High 367.17m "should have correct high"
+              Expect.equal result3.Low 366.57m "should have correct low"
+              Expect.equal result3.Close 366.97m "should have correct close"
+              Expect.equal result3.Volume 1396993m "should have correct volume"
+
+          testCase "aggregate should return empty list for empty history"
+          <| fun _ ->
+              let emptyQuotes: Quote alist = AList.empty
+
+              let result =
+                  aggregateByTimeSpan (TimeSpan.FromDays 1) emptyQuotes
+                  |> Result.defaultValue AList.empty
+                  |> AList.force
+
+              Expect.isTrue result.IsEmpty "List should be empty" ]
 
 [<Tests>]
 let quoteDListToToTuplesTests =
