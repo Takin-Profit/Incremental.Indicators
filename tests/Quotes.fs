@@ -120,7 +120,18 @@ let aggregateByTimeFrameTests =
               Expect.equal result3.High 367.17m "should have correct high"
               Expect.equal result3.Low 366.57m "should have correct low"
               Expect.equal result3.Close 366.97m "should have correct close"
-              Expect.equal result3.Volume 1396993m "should have correct volume" ]
+              Expect.equal result3.Volume 1396993m "should have correct volume"
+
+          testCase "aggregate should return empty list for empty history"
+          <| fun _ ->
+              let emptyQuotes: Quote alist = AList.empty
+
+              let result =
+                  aggregateByTimeFrame TimeFrame.OneDay emptyQuotes
+                  |> Result.defaultValue AList.empty
+                  |> AList.force
+
+              Expect.isTrue result.IsEmpty "List should be empty" ]
 
 
 [<Tests>]
