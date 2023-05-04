@@ -13,6 +13,10 @@ let aggregateByTimeFrameTests =
     let intraDay = TestData.getIntraDay 1564
     let testQuotes = Option.defaultValue AList.empty intraDay
 
+    let fifteenMin =
+        aggregateByTimeFrame TimeFrame.FifteenMin testQuotes
+        |> Result.defaultValue AList.empty
+
     let sampleQuotes =
         [ { Quote.Date = DateTime(2023, 5, 1, 12, 0, 0)
             Open = 10m
@@ -87,23 +91,28 @@ let aggregateByTimeFrameTests =
 
           testCase "aggregates quotes returns proper quantities"
           <| fun _ ->
-              let result =
-                  aggregateByTimeFrame TimeFrame.FifteenMin testQuotes
-                  |> Result.defaultValue AList.empty
 
-              let count = AList.count result |> AVal.force
+              let count = AList.count fifteenMin |> AVal.force
 
               Expect.equal count 108 "aggregate should return proper count"
 
           testCase "quotes should have correct values"
           <| fun _ ->
-              let result1 = getVal 0 Quote.Empty testQuotes |> AVal.force
+              let result1 = getVal 0 Quote.Empty fifteenMin |> AVal.force
               Expect.equal result1.Date (DateTime.Parse("2020-12-15 09:30")) "should have correct date"
               Expect.equal result1.Open 367.40m "should have correct open"
               Expect.equal result1.High 367.775m "should have correct high"
               Expect.equal result1.Low 367.02m "should have correct low"
               Expect.equal result1.Close 367.24m "should have correct close"
-              Expect.equal result1.Volume 2401786m "should have correct volume" ]
+              Expect.equal result1.Volume 2401786m "should have correct volume"
+
+              let result2 = getVal 1 Quote.Empty fifteenMin |> AVal.force
+              Expect.equal result2.Date (DateTime.Parse("2020-12-15 09:45")) "should have correct date"
+              Expect.equal result2.Open 367.25m "should have correct open"
+              Expect.equal result2.High 367.44m "should have correct high"
+              Expect.equal result2.Low 366.69m "should have correct low"
+              Expect.equal result2.Close 366.86m "should have correct close"
+              Expect.equal result2.Volume 1669983m "should have correct volume" ]
 
 
 [<Tests>]

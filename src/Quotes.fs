@@ -169,12 +169,13 @@ module internal Quotes =
             |> AMap.map (fun x v ->
                 { Quote.Date = x
                   Open = IndexList.first v |> fun t -> t.Open
-                  High = Seq.maxBy (fun (t: Quote) -> t.High) v |> fun t -> t.High
-                  Low = Seq.minBy (fun (t: Quote) -> t.Low) v |> fun t -> t.Low
-                  Close = Seq.last v |> fun t -> t.Close
-                  Volume = Seq.sumBy (fun (t: Quote) -> t.Volume) v })
+                  High = IndexList.toSeq v |> Seq.maxBy (fun t -> t.High) |> (fun t -> t.High)
+                  Low = IndexList.toSeq v |> Seq.minBy (fun t -> t.Low) |> (fun t -> t.Low)
+                  Close = IndexList.last v |> fun t -> t.Close
+                  Volume = IndexList.sumBy (fun (t: Quote) -> t.Volume) v })
             |> AMap.toASetValues
             |> ASet.toAList
+            |> AList.sortBy (fun t -> t.Date)
             |> Ok
 
 
