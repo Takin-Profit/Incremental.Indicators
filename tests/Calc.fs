@@ -177,4 +177,40 @@ let getDecimalPlacesTests =
               let actual = getDecimalPlaces -123.456m
               let expected = 3
               Expect.equal actual expected "should be 3"
-          } ]
+          }
+
+          testCase "No decimal places"
+          <| fun _ ->
+              let result = getDecimalPlaces 123m
+              let expected = 0
+              Expect.equal result expected "The function should return 0 decimal places for an integer"
+
+          testCase "One decimal place"
+          <| fun _ ->
+              let result = getDecimalPlaces 0.5m
+              let expected = 1
+              Expect.equal result expected "The function should return 1 decimal place"
+
+          testCase "Two decimal places"
+          <| fun _ ->
+              let result = getDecimalPlaces 0.25m
+              let expected = 2
+              Expect.equal result expected "The function should return 2 decimal places"
+
+          testCase "Three decimal places"
+          <| fun _ ->
+              let result = getDecimalPlaces 0.125m
+              let expected = 3
+              Expect.equal result expected "The function should return 3 decimal places"
+
+          testCase "Trailing zeros"
+          <| fun _ ->
+              let result = getDecimalPlaces 0.300m
+              let expected = 1
+              Expect.equal result expected "The function should return 1 decimal place, ignoring trailing zeros"
+
+          testCase "Negative numbers"
+          <| fun _ ->
+              let result = getDecimalPlaces -0.75m
+              let expected = 2
+              Expect.equal result expected "The function should return 2 decimal places for a negative number" ]
