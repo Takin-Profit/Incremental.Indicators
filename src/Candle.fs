@@ -1,12 +1,14 @@
 module Incremental.Indicators.Candle
 
+open FSharp.Data.Adaptive
 open System
 open Types
 
 // properties of each candle
 [<Serializable>]
 type Props =
-    { High: decimal
+    { Date: DateTime
+      High: decimal
       Low: decimal
       Open: decimal
       Close: decimal
@@ -23,7 +25,7 @@ type Props =
       IsBullish: bool
       IsBearish: bool }
 
-let makeCandleProps (quote: Quote) =
+let internal makeCandleProps (quote: Quote) =
     let high = quote.High
     let low = quote.Low
     let openPrice = quote.Open
@@ -39,7 +41,8 @@ let makeCandleProps (quote: Quote) =
     let upperWick = high - if openPrice > close then openPrice else close
     let lowerWick = if openPrice > close then close else openPrice - low
 
-    { High = high
+    { Date = quote.Date
+      High = high
       Low = low
       Open = openPrice
       Close = close
@@ -61,8 +64,20 @@ type CandleResult =
       Candle: Props }
 
 // TODO: fix this constructor function to create price correctly as well as match Prop.
-let makeCandleResult (quote: Quote) =
+let internal makeCandleResult (quote: Quote) =
     { Date = quote.Date
       Price = quote.Close
-      Match = Match.Neutral
+      Match = Match.None
       Candle = makeCandleProps quote }
+
+let condense results =
+    results |> AList.filter (fun t -> t.Match <> Match.None)
+
+let internal fromQuote quote = makeCandleProps quote
+
+/// convert/sort quotes into candles list
+let toCandles quotes =
+    quotes |> AList.map fromQuote |> AList.sortBy (fun t -> t.Date)
+
+let internal toCandleResults quotes =
+    quotes |> AList.map makeCandleResult |> AList.sortBy (fun t -> t.Date)

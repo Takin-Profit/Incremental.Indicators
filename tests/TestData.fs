@@ -54,7 +54,6 @@ let private quoteFromCsv (row: CsvRow) =
     if row.Columns |> Array.contains "" then
         None
     else
-
         let parseDate str =
             try
                 let dt = DateTime.Parse str
@@ -62,16 +61,16 @@ let private quoteFromCsv (row: CsvRow) =
             with _ ->
                 None
 
-        let date = row.GetColumn "date" |> parseDate
+        let date = row.Columns[0] |> parseDate
 
         date
         |> Option.map (fun dt ->
             { Quote.Date = dt
-              Open = row.GetColumn "open" |> decimal
-              High = row.GetColumn "high" |> decimal
-              Low = row.GetColumn "low" |> decimal
-              Close = row.GetColumn "close" |> decimal
-              Volume = row.GetColumn "volume" |> decimal })
+              Open = row.Columns[1] |> decimal
+              High = row.Columns[2] |> decimal
+              Low = row.Columns[3] |> decimal
+              Close = row.Columns[4] |> decimal
+              Volume = row.Columns[5] |> decimal })
 
 
 let private getQuotes file days =
@@ -86,12 +85,15 @@ let private getQuotes file days =
     if quotes |> Seq.exists Option.isNone then
         None
     else
-        quotes
-        |> Seq.map (fun t -> Option.defaultValue Quote.Empty t)
-        |> Seq.take days
-        |> Seq.sortByDescending (fun t -> t.Date)
-        |> AList.ofSeq
-        |> Some
+        let f =
+            quotes
+            |> Seq.map (fun t -> Option.defaultValue Quote.Empty t)
+            |> Seq.sortByDescending (fun t -> t.Date)
+
+        if days <> 0 then
+            f |> Seq.take days |> AList.ofSeq |> Some
+        else
+            f |> AList.ofSeq |> Some
 
 // DEFAULT: S&P 500 ~2 years of daily data
 let getDefault days = getQuotes "default.csv" days
@@ -116,7 +118,7 @@ let getLongest days = getQuotes "longest.csv" days
 // Penny Data
 let getPenny days = getQuotes "penny.csv" days
 // MISMATCH DATA is in incorrect sequence
-let getMismatch days = getQuotes "mismatch.csv" days
+let getMismatch = getQuotes "mismatch.csv" 0
 // SPX, 30 years, daily
 let getSpx days = getQuotes "spx.csv" days
 // MSFT, 30 years, daily

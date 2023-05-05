@@ -9,6 +9,7 @@
     <ItemGroup>
         <Folder Include="Data\" />
         <Compile Include="TestData.fs" />
+        <Compile Include="Candle.fs" />
         <Compile Include="Util.fs" />
         <Compile Include="Calc.fs" />
         <Compile Include="Types.fs" />
