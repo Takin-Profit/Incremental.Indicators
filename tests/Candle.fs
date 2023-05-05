@@ -53,20 +53,33 @@ let moreCandleTests =
               let result = candles.Count
               Expect.equal result 502 "should be 502"
 
-          testCase "candles should have correct values"
+          testCase "candles from first quote should have correct values"
           <| fun _ ->
-              let res0 = candles[0]
+              let res = candles[0]
 
-              Expect.equal res0.Candle.Close 212.8m "close price should match"
-              Expect.equal res0.Candle.Size 1.83m "candle size be correct"
-              Expect.equal res0.Candle.Body 0.19m "candle body should match"
-              Expect.equal res0.Candle.UpperWick 0.55m "upperWick should be correct"
-              Expect.equal res0.Candle.LowerWick 1.09m "lowerWick should be correct"
-              Expect.equal (Math.Round(res0.Candle.BodyPct, 5)) 0.10383 "body percent should be correct"
-              Expect.equal (Math.Round(res0.Candle.UpperWickPct, 5)) 0.30055 "upperWick percent should be correct"
-              Expect.equal (Math.Round(res0.Candle.LowerWickPct, 5)) 0.59563 "lowerWick percent should be correct"
-              Expect.isTrue res0.Candle.IsBullish "should calculate bullishness correctly"
-              Expect.isFalse res0.Candle.IsBearish "should calculate bearishness correctly"
+              Expect.equal res.Candle.Close 212.8m "close price should match"
+              Expect.equal res.Candle.Size 1.83m "candle size be correct"
+              Expect.equal res.Candle.Body 0.19m "candle body should match"
+              Expect.equal res.Candle.UpperWick 0.55m "upperWick should be correct"
+              Expect.equal res.Candle.LowerWick 1.09m "lowerWick should be correct"
+              Expect.equal (Math.Round(res.Candle.BodyPct, 5)) 0.10383 "body percent should be correct"
+              Expect.equal (Math.Round(res.Candle.UpperWickPct, 5)) 0.30055 "upperWick percent should be correct"
+              Expect.equal (Math.Round(res.Candle.LowerWickPct, 5)) 0.59563 "lowerWick percent should be correct"
+              Expect.isTrue res.Candle.IsBullish "should calculate bullishness correctly"
+              Expect.isFalse res.Candle.IsBearish "should calculate bearishness correctly"
 
+          testCase "candles from random quote should have correct values"
+          <| fun _ ->
+              let res = candles[351]
+
+              Expect.equal res.Candle.Size 1.24m "candle size be correct"
+              Expect.equal res.Candle.Body 0m "candle body should match"
+              Expect.equal res.Candle.UpperWick 0.69m "upperWick should be correct"
+              Expect.equal res.Candle.LowerWick 0.55m "lowerWick should be correct"
+              Expect.equal (Math.Round(res.Candle.BodyPct, 5)) 0 "body percent should be correct"
+              Expect.equal (Math.Round(res.Candle.UpperWickPct, 5)) 0.55645 "upperWick percent should be correct"
+              Expect.equal (Math.Round(res.Candle.LowerWickPct, 5)) 0.44355 "lowerWick percent should be correct"
+              Expect.isFalse res.Candle.IsBullish "should calculate bullishness correctly"
+              Expect.isFalse res.Candle.IsBearish "should calculate bearishness correctly"
 
           ]
