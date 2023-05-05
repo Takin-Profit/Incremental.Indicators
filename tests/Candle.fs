@@ -5,6 +5,7 @@ open System
 open Incremental.Indicators
 open FSharp.Data.Adaptive
 open System.Globalization
+open Incremental.Indicators.Candle
 
 [<Tests>]
 let candleTests =
@@ -96,4 +97,8 @@ let moreCandleTests =
               Expect.isTrue res.Candle.IsBullish "should calculate bullishness correctly"
               Expect.isFalse res.Candle.IsBearish "should calculate bearishness correctly"
 
-          ]
+          testCase "cto candles test"
+          <| fun _ ->
+              let actual = toCandles quotes |> AList.count |> AVal.force
+              let expected = AList.count quotes |> AVal.force
+              Expect.equal actual expected "candles list should have correct length" ]
