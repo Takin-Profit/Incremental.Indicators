@@ -4,7 +4,7 @@ open System
 open FSharp.Data.Adaptive
 
 
-let internal calcSMA (lookBack: int) (series: Series) =
+let internal calcSMA (lookBack: int) (series: Series) : Series =
 
     let mutable count = 0
 
