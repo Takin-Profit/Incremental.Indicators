@@ -76,6 +76,52 @@ module internal Quotes =
     // convert a sequence of quotes to a clist
     let createList (quotes: seq<Quote>) = validate quotes |> Result.map clist
 
+    /// Convert TQuote element to basic data record
+    let toSeriesValue (candlePart: CandlePart) (q: QuoteD) =
+        match candlePart with
+        | CandlePart.Open -> {| Date = q.Date; Value = q.Open |}
+        | CandlePart.High -> {| Date = q.Date; Value = q.High |}
+        | CandlePart.Low -> {| Date = q.Date; Value = q.Low |}
+        | CandlePart.Close -> {| Date = q.Date; Value = q.Close |}
+        | CandlePart.Volume -> {| Date = q.Date; Value = q.Volume |}
+        | CandlePart.HL2 ->
+            {| Date = q.Date
+               Value = (q.High + q.Low) / 2.0 |}
+        | CandlePart.HLC3 ->
+            {| Date = q.Date
+               Value = (q.High + q.Low + q.Close) / 3.0 |}
+        | CandlePart.OC2 ->
+            {| Date = q.Date
+               Value = (q.Open + q.Close) / 2.0 |}
+        | CandlePart.OHL3 ->
+            {| Date = q.Date
+               Value = (q.Open + q.High + q.Low) / 3.0 |}
+        | CandlePart.OHLC4 ->
+            {| Date = q.Date
+               Value = (q.Open + q.High + q.Low + q.Close) / 4.0 |}
+
+    let toSeriesValueDec (candlePart: CandlePart) (q: Quote) =
+        match candlePart with
+        | CandlePart.Open -> {| Date = q.Date; Value = q.Open |}
+        | CandlePart.High -> {| Date = q.Date; Value = q.High |}
+        | CandlePart.Low -> {| Date = q.Date; Value = q.Low |}
+        | CandlePart.Close -> {| Date = q.Date; Value = q.Close |}
+        | CandlePart.Volume -> {| Date = q.Date; Value = q.Volume |}
+        | CandlePart.HL2 ->
+            {| Date = q.Date
+               Value = (q.High + q.Low) / 2.0m |}
+        | CandlePart.HLC3 ->
+            {| Date = q.Date
+               Value = (q.High + q.Low + q.Close) / 3.0m |}
+        | CandlePart.OC2 ->
+            {| Date = q.Date
+               Value = (q.Open + q.Close) / 2.0m |}
+        | CandlePart.OHL3 ->
+            {| Date = q.Date
+               Value = (q.Open + q.High + q.Low) / 3.0m |}
+        | CandlePart.OHLC4 ->
+            {| Date = q.Date
+               Value = (q.Open + q.High + q.Low + q.Close) / 4.0m |}
 
     // convert Quote element to basic tuple of double precision values
     let toTuple (candlePart: CandlePart) (q: Quote) =
@@ -90,6 +136,13 @@ module internal Quotes =
         | CandlePart.OC2 -> (q.Date, double (q.Open + q.Close) / 2.0)
         | CandlePart.OHL3 -> (q.Date, double (q.Open + q.High + q.Low) / 3.0)
         | CandlePart.OHLC4 -> (q.Date, double (q.Open + q.High + q.Low + q.Close) / 4.0)
+
+
+    let listToSeries candlePart quotes =
+        quotes |> AList.map (toSeriesValue candlePart)
+
+    let listToSeriesDec candlePart quotes =
+        quotes |> AList.map (toSeriesValueDec candlePart)
 
     // convert Quote alist to (DateTime * double) alist
     // candlePart determines the part of price to be used
@@ -243,6 +296,12 @@ type Quotes =
 
     member x.SeriesDec: SeriesDec =
         x.sortedQuotes |> AList.map (fun t -> {| Date = t.Date; Value = t.Close |})
+
+    member x.seriesFrom candlePart : Series =
+        x.doubleQuotes |> AList.map (Quotes.toSeriesValue candlePart)
+
+    member x.seriesDecFrom candlePart : SeriesDec =
+        x.sortedQuotes |> AList.map (Quotes.toSeriesValueDec candlePart)
 
     member x.toArray = AList.force x.quotes |> IndexList.toArray
 
