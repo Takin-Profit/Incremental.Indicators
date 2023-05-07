@@ -2,7 +2,7 @@ module Incremental.Indicators.SMA
 
 open System
 open FSharp.Data.Adaptive
-open Types
+
 
 let internal calcSMA (lookBack: int) (series: Series) =
 
@@ -15,12 +15,12 @@ let internal calcSMA (lookBack: int) (series: Series) =
             if count >= lookBack then
                 let offset = count - lookBack
 
-                let period = AList.sub offset lookBack series
+                let period = AList.sub offset lookBack (Series.values series)
 
                 let! res = AList.average period
 
-                {| Date = quote.Date; Value = res |}
+                {| Date = t.Date; Value = res |}
             else
-                {| Date = quote.Date
+                {| Date = t.Date
                    Value = double Double.NaN |}
     }
