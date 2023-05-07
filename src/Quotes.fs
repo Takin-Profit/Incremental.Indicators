@@ -238,8 +238,11 @@ type Quotes =
     /// convert quotes to double alist with OHLC4 prices
     member x.OHLC4 = x.prices CandlePart.OHLC4
 
-    member x.Series =
+    member x.Series: Series =
         x.doubleQuotes |> AList.map (fun t -> {| Date = t.Date; Value = t.Close |})
+
+    member x.SeriesDec: SeriesDec =
+        x.sortedQuotes |> AList.map (fun t -> {| Date = t.Date; Value = t.Close |})
 
     member x.toArray = AList.force x.quotes |> IndexList.toArray
 
