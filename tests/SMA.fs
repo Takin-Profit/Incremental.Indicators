@@ -20,13 +20,13 @@ let smaTests =
         "SMA Tests"
         [ testCase "sma should return correct number of results"
           <| fun _ ->
-              let results = calcSMA 20 quotes |> AList.force
+              let results = calcSMA 20 quotes.Series |> AList.force
               Expect.equal results.Count 502 "should be 502"
 
           testCase "should return correct number of results without NaN values"
           <| fun _ ->
               let results =
-                  calcSMA 20 quotes
+                  calcSMA 20 quotes.Series
                   |> AList.force
                   |> IndexList.filter (fun t -> not (Double.IsNaN(t.Value)))
 
@@ -36,7 +36,7 @@ let smaTests =
 
           testCase "should return correct Values for default.csv"
           <| fun _ ->
-              let results = calcSMA 20 quotes |> AList.force
+              let results = calcSMA 20 quotes.Series |> AList.force
 
               let result = IndexList.tryAt 18 results |> Option.defaultValue Util.emptyResult
               let result19 = IndexList.tryAt 19 results |> Option.defaultValue Util.emptyResult
