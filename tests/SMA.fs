@@ -77,4 +77,22 @@ let smaTests =
               Expect.equal (Math.Round(result249.Value, 4)) 255.6915 "should be 255.6915"
               Expect.equal (Math.Round(result501.Value, 4)) 253.1725 "should be 253.1725"
 
+          testCase "CandlePart.Volume tests"
+          <| fun _ ->
+              let results = calcSMA 20 (quotes.seriesFrom CandlePart.Volume) |> AList.force
+
+              Expect.equal results.Count 502 "should be 502 total results"
+
+              let nonNaN = results |> IndexList.filter (fun t -> not (Double.IsNaN(t.Value)))
+
+              Expect.equal (IndexList.count nonNaN) 483 "should be 483 nonNaN results"
+
+              let result24 = IndexList.tryAt 24 results |> Option.defaultValue Util.emptyResult
+              let result290 = IndexList.tryAt 290 results |> Option.defaultValue Util.emptyResult
+              let result501 = IndexList.tryAt 501 results |> Option.defaultValue Util.emptyResult
+
+              Expect.equal result24.Value 77293768.2 "should be 77293768.2"
+              Expect.equal result290.Value 157958070.8 "should be 157958070.8"
+              Expect.equal result501.Value 163695200 "should be 163695200"
+
           ]
