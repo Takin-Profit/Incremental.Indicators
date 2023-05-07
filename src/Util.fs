@@ -3,6 +3,13 @@ module Incremental.Indicators.Util
 open FSharp.Data.Adaptive
 open System
 
+
+let emptyResult =
+    {| Date = DateTime.MaxValue
+       Value = double 0.0 |}
+
+let isEmptyResult (result: {| Date: DateTime; Value: double |}) = result.Date = DateTime.MaxValue
+
 /// gets a value from an AList without having to use AList.tryGet or AList.tryAt
 /// Which are not recommended
 let getVal offset defaultVal list =

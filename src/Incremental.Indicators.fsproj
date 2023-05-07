@@ -10,12 +10,15 @@
         <Compile Include="Util.fs" />
         <Compile Include="Types.fs" />
         <Compile Include="Calc.fs" />
+        <Compile Include="Series.fs" />
         <Compile Include="Quotes.fs" />
         <Compile Include="Candle.fs" />
         <Compile Include="Results.fs" />
+        <Compile Include="SMA.fs" />
+        <Compile Include="RMA.fs" />
         <Compile Include="RSI.fs" />
         <Compile Include="CCI.fs" />
-        <Compile Include="SMA.fs" />
+        <Compile Include="ADX.fs" />
     </ItemGroup>
     <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
         <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />

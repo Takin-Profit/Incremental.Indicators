@@ -88,7 +88,7 @@ let private getQuotes file days =
         let f =
             quotes
             |> Seq.map (fun t -> Option.defaultValue Quote.Empty t)
-            |> Seq.sortByDescending (fun t -> t.Date)
+            |> Seq.sortBy (fun t -> t.Date)
 
         if days <> 0 then
             f |> Seq.take days |> AList.ofSeq |> Some

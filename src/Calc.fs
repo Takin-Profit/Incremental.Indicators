@@ -4,6 +4,11 @@ open System
 open FSharp.Data.Adaptive
 open Util
 
+
+let na value = Double.IsNaN value
+
+let nz (value: double) : double =
+    if Double.IsNaN(value) then 0.0 else value
 // adaptive mean deviation function
 let meanDev (values: double alist) =
 

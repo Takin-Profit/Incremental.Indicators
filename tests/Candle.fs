@@ -2,7 +2,6 @@ module Incremental.Indicators.Tests.Candle
 
 open Expecto
 open System
-open Incremental.Indicators
 open FSharp.Data.Adaptive
 open System.Globalization
 open Incremental.Indicators.Candle
@@ -11,7 +10,7 @@ open Incremental.Indicators.Candle
 let candleTests =
     let quotes = TestData.getMismatch |> Option.defaultValue AList.empty
 
-    let candles = Candle.toCandleResults quotes |> AList.force
+    let candles = toCandleResults quotes |> AList.force
 
     testList
         "candle tests"
@@ -45,7 +44,7 @@ let candleTests =
 let moreCandleTests =
     let quotes = TestData.getDefault 502 |> Option.defaultValue AList.empty
 
-    let candles = Candle.toCandleResults quotes |> AList.force
+    let candles = toCandleResults quotes |> AList.force
 
     testList
         "candle tests extended"

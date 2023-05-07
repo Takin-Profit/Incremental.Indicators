@@ -24,7 +24,7 @@ type Quote =
     static member IsEmpty q = q.Date = DateTime.MaxValue
 
 
-type internal QuoteD =
+type QuoteD =
     { Date: DateTime
       Open: double
       High: double
@@ -238,6 +238,21 @@ type Quotes =
     /// convert quotes to double alist with OHLC4 prices
     member x.OHLC4 = x.prices CandlePart.OHLC4
 
+    member x.Series =
+        x.doubleQuotes |> AList.map (fun t -> {| Date = t.Date; Value = t.Close |})
+
+    member x.toArray = AList.force x.quotes |> IndexList.toArray
+
+    member x.toList = AList.force x.quotes |> IndexList.toList
+
+    member x.toSeq = AList.force x.quotes |> IndexList.toSeq
+
+    member x.toArrayDouble = AList.force x.DoublePrecis |> IndexList.toArray
+
+    member x.toListDouble = AList.force x.DoublePrecis |> IndexList.toList
+
+    member x.toSeqDouble = AList.force x.DoublePrecis |> IndexList.toSeq
+
     /// add a single quote to the list, will return an Error if a quote
     /// with the same Date is already in the list
     member x.add(quote: Quote) =
@@ -255,3 +270,8 @@ type Quotes =
                 { quotes = q
                   doubleQuotes = Quotes.toQuoteDList q |> AList.sortBy (fun x -> x.Date)
                   sortedQuotes = q |> AList.sortBy (fun x -> x.Date) }
+
+    static member empty =
+        { quotes = clist []
+          doubleQuotes = AList.empty
+          sortedQuotes = AList.empty }

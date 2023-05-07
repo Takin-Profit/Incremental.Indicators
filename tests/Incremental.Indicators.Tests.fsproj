@@ -10,11 +10,15 @@
         <Folder Include="Data\" />
         <Compile Include="TestData.fs" />
         <Compile Include="Candle.fs" />
+        <Compile Include="Data.fs" />
+        <Compile Include="Results.fs" />
+        <Compile Include="ADX.fs" />
         <Compile Include="Util.fs" />
         <Compile Include="Calc.fs" />
         <Compile Include="Types.fs" />
         <Compile Include="Quotes.fs" />
         <Compile Include="RSI.fs" />
+        <Compile Include="SMA.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
