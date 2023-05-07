@@ -5,6 +5,7 @@ open Incremental.Indicators
 open Expecto
 open System
 open Incremental.Indicators.SMA
+open Incremental.Indicators.Types
 
 let internal quotes =
     TestData.getDefault 502
@@ -51,5 +52,29 @@ let smaTests =
               Expect.equal (Math.Round(result149.Value, 4)) 234.9350 "should be 234.9350"
               Expect.equal (Math.Round(result249.Value, 4)) 255.5500 "should be 255.5500"
               Expect.equal (Math.Round(result501.Value, 4)) 251.8600 "should be 251.8600"
+
+          testCase "CandlePart.Open tests"
+          <| fun _ ->
+              let results = calcSMA 20 (quotes.seriesFrom CandlePart.Open) |> AList.force
+
+              Expect.equal results.Count 502 "should be 502 total results"
+
+              let nonNaN = results |> IndexList.filter (fun t -> not (Double.IsNaN(t.Value)))
+
+              Expect.equal (IndexList.count nonNaN) 483 "should be 483 nonNaN results"
+
+              let result = IndexList.tryAt 18 results |> Option.defaultValue Util.emptyResult
+              let result19 = IndexList.tryAt 19 results |> Option.defaultValue Util.emptyResult
+              let result24 = IndexList.tryAt 24 results |> Option.defaultValue Util.emptyResult
+              let result149 = IndexList.tryAt 149 results |> Option.defaultValue Util.emptyResult
+              let result249 = IndexList.tryAt 249 results |> Option.defaultValue Util.emptyResult
+              let result501 = IndexList.tryAt 501 results |> Option.defaultValue Util.emptyResult
+
+              Expect.isTrue (Double.IsNaN(result.Value)) "should be NaN"
+              Expect.equal (Math.Round(result19.Value, 4)) 214.3795 "should be 214.3795"
+              Expect.equal (Math.Round(result24.Value, 4)) 214.9535 "should be 214.9535"
+              Expect.equal (Math.Round(result149.Value, 4)) 234.8280 "should be 234.8280"
+              Expect.equal (Math.Round(result249.Value, 4)) 255.6915 "should be 255.6915"
+              Expect.equal (Math.Round(result501.Value, 4)) 253.1725 "should be 253.1725"
 
           ]
