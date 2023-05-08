@@ -19,6 +19,7 @@
         <Compile Include="Quotes.fs" />
         <Compile Include="RSI.fs" />
         <Compile Include="SMA.fs" />
+        <Compile Include="RMA.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>

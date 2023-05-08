@@ -4,9 +4,10 @@ open System
 open FSharp.Data.Adaptive
 open Util
 
-
+/// Tests if `value` is NaN, Returns true if `value` is na, false otherwise
 let na value = Double.IsNaN value
 
+/// the nz() function replaces NaN (na) values with zeros (or given value) in a series.
 let nz (value: double) : double =
     if Double.IsNaN(value) then 0.0 else value
 // adaptive mean deviation function

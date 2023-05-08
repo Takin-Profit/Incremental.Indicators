@@ -6,30 +6,27 @@ open SMA
 open Calc
 
 
-(*
-let rma (length: int) (quotes: Quotes) =
+
+let calcRMA (length: int) (series: Series) : Series =
     let alpha = 1.0 / (double length)
 
-    let calculateRma (source: Quotes) =
-        let mutable previousSum =
-            { Date = DateTime.MinValue
-              Value = Double.NaN }
+    let calculateRma (source: Series) =
+        let mutable previousSum = Double.NaN
 
-        let rmaSeq =
-            alist {
-                for price in source.CloseTuples do
-                    let currentPrice = snd price
 
-                    previousSum <-
-                        if na previousSum.Value then
-                            calcSMA length source
-                        else
-                            alpha * price + (1.0 - alpha) * nz (previousSum)
+        alist {
+            for t in source do
+                let price = t.Value
 
-                    yield previousSum
-            }
+                previousSum <-
+                    if na previousSum then
+                        ((calcSMA length source) |> Series.findByDate t.Date).Value
+                    else
+                        alpha * price + (1.0 - alpha) * nz previousSum
 
-        List.ofSeq rmaSeq
+                yield
+                    {| Date = t.Date
+                       Value = double previousSum |}
+        }
 
-    calculateRma quotes
-*)
+    calculateRma series

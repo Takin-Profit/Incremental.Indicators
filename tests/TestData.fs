@@ -72,6 +72,54 @@ let private quoteFromCsv (row: CsvRow) =
               Close = row.Columns[4] |> decimal
               Volume = row.Columns[5] |> decimal })
 
+let private timeStampQuoteFromCsv (row: CsvRow) =
+
+    let timeStampToDT timeStamp =
+        let dt = DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+        dt.AddSeconds(timeStamp).ToLocalTime()
+
+    if row.Columns |> Array.contains "" then
+        None
+    else
+        let parseDate ts =
+            try
+                let dt = timeStampToDT ts
+                Some dt
+            with _ ->
+                None
+
+        let date = row.Columns[0] |> double |> parseDate
+
+        date
+        |> Option.map (fun dt ->
+            { Quote.Date = dt
+              Open = row.Columns[1] |> decimal
+              High = row.Columns[2] |> decimal
+              Low = row.Columns[3] |> decimal
+              Close = row.Columns[4] |> decimal
+              Volume = row.Columns[5] |> decimal })
+
+let private getQuotesTS file days =
+    let file = csvFile file
+
+    let quotes =
+        seq {
+            for row in file.Rows do
+                yield timeStampQuoteFromCsv row
+        }
+
+    if quotes |> Seq.exists Option.isNone then
+        None
+    else
+        let f =
+            quotes
+            |> Seq.map (fun t -> Option.defaultValue Quote.Empty t)
+            |> Seq.sortBy (fun t -> t.Date)
+
+        if days <> 0 then
+            f |> Seq.take days |> AList.ofSeq |> Some
+        else
+            f |> AList.ofSeq |> Some
 
 let private getQuotes file days =
     let file = csvFile file
@@ -125,6 +173,8 @@ let getSpx days = getQuotes "spx.csv" days
 let getMsft days = getQuotes "msft.csv" days
 // BTCUSD, 69288 records, 15-minute bars
 let getBtcUsdNan days = getQuotes "btcusd15x69k.csv" days
+
+let getSpyWithRMA = getQuotesTS "spy_with_rma.csv" 0
 
 let getTupleNan =
     let timeFactor = double 10000000

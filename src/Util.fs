@@ -3,12 +3,11 @@ module Incremental.Indicators.Util
 open FSharp.Data.Adaptive
 open System
 
-
-let emptyResult =
-    {| Date = DateTime.MaxValue
-       Value = double 0.0 |}
-
-let isEmptyResult (result: {| Date: DateTime; Value: double |}) = result.Date = DateTime.MaxValue
+/// unwraps an aval into an option type
+let get value =
+    let mutable t = None
+    value |> AVal.map (fun v -> t <- v) |> ignore
+    t
 
 /// gets a value from an AList without having to use AList.tryGet or AList.tryAt
 /// Which are not recommended
