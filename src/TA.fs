@@ -1,7 +1,5 @@
 namespace Incremental.Indicators
 
-namespace Incremental.Indicators
-
 open System
 open FSharp.Data.Adaptive
 
