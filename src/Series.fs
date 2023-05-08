@@ -24,4 +24,4 @@ module Series =
     let findByDate date (series: Series) =
         let filtered = series |> AList.filter (fun t -> t.Date = date)
         let mutable value = emptyVal
-        AList.tryFirst filtered |> Util.get |> Option.defaultValue emptyVal
+        AList.tryFirst filtered |> Util.getAValOption |> Option.defaultValue emptyVal

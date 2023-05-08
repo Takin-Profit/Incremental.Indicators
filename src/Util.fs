@@ -4,8 +4,13 @@ open FSharp.Data.Adaptive
 open System
 
 /// unwraps an aval into an option type
-let get value =
+let getAValOption value =
     let mutable t = None
+    value |> AVal.map (fun v -> t <- v) |> ignore
+    t
+
+let getAValInt value =
+    let mutable t = 0
     value |> AVal.map (fun v -> t <- v) |> ignore
     t
 

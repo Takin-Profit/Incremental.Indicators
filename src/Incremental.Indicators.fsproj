@@ -6,11 +6,11 @@
         <RootNamespace>Incremental.Indicators</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="Library.fs" />
         <Compile Include="Util.fs" />
+        <Compile Include="Series.fs" />
+        <Compile Include="Library.fs" />
         <Compile Include="Types.fs" />
         <Compile Include="Calc.fs" />
-        <Compile Include="Series.fs" />
         <Compile Include="Quotes.fs" />
         <Compile Include="Candle.fs" />
         <Compile Include="Results.fs" />
