@@ -8,6 +8,7 @@
     </PropertyGroup>
     <ItemGroup>
         <Folder Include="Data\" />
+        <Compile Include="Helpers.fs" />
         <Compile Include="TestData.fs" />
         <Compile Include="TA.fs" />
         <Compile Include="Candle.fs" />
@@ -19,7 +20,6 @@
         <Compile Include="Types.fs" />
         <Compile Include="Quotes.fs" />
         <Compile Include="RSI.fs" />
-        <Compile Include="Helpers.fs" />
         <Compile Include="SMA.fs" />
         <Compile Include="RMA.fs" />
         <Compile Include="Main.fs" />

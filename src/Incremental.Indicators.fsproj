@@ -8,6 +8,7 @@
     <ItemGroup>
         <Compile Include="Util.fs" />
         <Compile Include="Series.fs" />
+        <Compile Include="TA.fs" />
         <Compile Include="Library.fs" />
         <Compile Include="Types.fs" />
         <Compile Include="Calc.fs" />
