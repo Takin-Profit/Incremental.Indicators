@@ -174,7 +174,7 @@ let getMsft days = getQuotes "msft.csv" days
 // BTCUSD, 69288 records, 15-minute bars
 let getBtcUsdNan days = getQuotes "btcusd15x69k.csv" days
 
-let getSpyWithRMA = getQuotesTS "spy_with_rma.csv" 0
+let getEthRMA = getQuotesTS "eth_rma.csv" 1000
 
 let getTupleNan =
     let timeFactor = double 10000000
